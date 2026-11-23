@@ -48,3 +48,46 @@ test("course chapters reference real missions, cases, and sources", () => {
     for (const path of ["everyday", "tech"]) assert.ok(ch.lesson[path].length && ch.example[path].facts.length, `chapter ${c + 1}: ${path} content`);
   }
 });
+
+test("the generated SQL returns what the reasoner concludes", async () => {
+  const { DatabaseSync } = await import("node:sqlite");
+  const { sqlFor, sqlForContradiction, table } = await import("../src/sql.js");
+  const { explain } = await import("../src/ontology.js");
+  const { presets } = await import("../src/data.js");
+  const worlds = [...levels.map((l, i) => [`case ${i + 1}`, l.world]), ...Object.entries(presets).map(([k, p]) => [k, p.world])];
+  // Run a step's SQL (after any inverse views it relies on) and return every value in the result.
+  const run = (world, result, sql, deps = [], views = []) => {
+    const derived = new Set([...deps.map((d) => d.p), ...views]);
+    const db = new DatabaseSync(":memory:");
+    db.exec("CREATE TABLE is_a(entity, class); CREATE TABLE subclass_of(child, parent);");
+    for (const p of world.properties) if (!derived.has(p.id)) db.exec(`CREATE TABLE ${table(p.id)}(source, target)`);
+    for (const f of world.facts) {
+      const t = f.p === "type" ? "is_a" : f.p === "subClassOf" ? "subclass_of" : f.p === "disjointWith" ? null : table(f.p);
+      if (t && !derived.has(f.p)) db.prepare(`INSERT INTO ${t} VALUES (?, ?)`).run(f.s, f.o);
+    }
+    for (const d of deps) db.exec(sqlFor(d, result).split(/\n\n(?=SELECT)/)[0]);
+    const parts = sql.split(/\n\n(?=SELECT)/);
+    parts.slice(0, -1).forEach((s) => db.exec(s));
+    return db.prepare(parts.at(-1)).all().flatMap(Object.values);
+  };
+  let checked = 0;
+  for (const [name, world] of worlds) {
+    const result = reason(world);
+    for (const [k, f] of result.facts) {
+      if (!f.inferred) continue;
+      const sql = sqlFor(f, result);
+      const deps = explain(result, [k]).filter((d) => d.rule === "Inverse" && d !== f);
+      // An inverse-derived relation lives only in its view, so its table isn't created.
+      const expected = ["Domain", "Range"].includes(f.rule) ? f.s : f.o;
+      const rows = run(world, result, sql, deps, f.rule === "Inverse" ? [f.p] : []);
+      assert.equal(rows.includes(expected), !sql.includes("Catch:"), `${name}: SQL for ${k}\n${sql}\nreturned ${rows}`);
+      checked++;
+    }
+    for (const c of result.contradictions) {
+      const sql = sqlForContradiction(c, result);
+      assert.equal(run(world, result, sql).includes(c.individual), !sql.includes("Catch:"), `${name}: contradiction SQL\n${sql}`);
+      checked++;
+    }
+  }
+  assert.ok(checked > 40, `checked ${checked} queries`);
+});

@@ -3,7 +3,8 @@
 import { reason, explain, describe, key } from "./ontology.js";
 import { createGraph, graphModel } from "./graph.js";
 import { levels } from "./data.js";
-import { progress, save, award, casePoints, solvedCount, onChange, formatTime } from "./progress.js";
+import { progress, save, award, solvedCount, onChange, formatTime, corePack, dataPack, packSolved, packPoints } from "./progress.js";
+import { sqlFor, sqlForContradiction, sqlToggle, sqlNote, sqlBlock, setSqlOn } from "./sql.js";
 import { openProfile } from "./profile.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -11,6 +12,8 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const CHECK = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const BULB = `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 12.5h4M6.5 14.5h3M8 1.5a4.5 4.5 0 0 0-2.5 8.2V11h5V9.7A4.5 4.5 0 0 0 8 1.5z"/></svg>`;
 const KEYS = "ABCD";
+const caseNo = (i) => `Case ${String(i + 1).padStart(2, "0")}`;
+const packOf = (i) => (levels[i].pack === "data" ? dataPack : corePack);
 
 let lv; // current level state
 const attempts = {}; // level index -> { wrong, hinted }, kept when a case is reopened
@@ -67,26 +70,28 @@ function renderFeedback() {
   const shown = lv.steps.slice(0, lv.revealed);
   const done = lv.revealed >= lv.steps.length;
   const last = lv.index === levels.length - 1;
-  const allSolved = solvedCount() === levels.length;
+  const pack = packOf(lv.index);
+  const isData = pack === dataPack;
+  const toData = lv.index === corePack.at(-1) && !packSolved(dataPack);
   const earned = progress.cases[lv.index];
   fb.innerHTML = `
     <div class="banner good">${CHECK} Correct<span class="pts">${lv.firstSolve ? `+${earned} pts` : "already solved"}</span></div>
     <div class="reasoning">
-      <div class="pane-title">Reasoner trace</div>
-      ${shown.length ? `<ol class="why">${shown
+      <div class="pane-title">Reasoner trace ${sqlToggle()}</div>
+      ${shown.length ? `${sqlNote()}<ol class="why">${shown
         .map((s) =>
           s.contradiction
-            ? `<li class="contra">${esc(s.contradiction.because)}</li>`
-            : `<li class="${s.inferred ? "inf" : ""}">${s.inferred ? `<span class="rule">${s.rule}</span>${esc(s.because)}` : `${esc(describe(s))} <span class="muted">· given</span>`}</li>`,
+            ? `<li class="contra">${esc(s.contradiction.because)}${sqlBlock(sqlForContradiction(s.contradiction, lv.result), esc)}</li>`
+            : `<li class="${s.inferred ? "inf" : ""}">${s.inferred ? `<span class="rule">${s.rule}</span>${esc(s.because)}${sqlBlock(sqlFor(s, lv.result), esc)}` : `${esc(describe(s))} <span class="muted">· given</span>`}</li>`,
         )
         .join("")}</ol>` : `<p class="muted small">Step through the derivation and watch each inferred edge appear on the graph.</p>`}
     </div>
     ${done ? `<div class="takeaway"><span class="mono label">Takeaway</span>${esc(lv.level.takeaway)}</div>` : ""}
     <div class="actions">
       ${done ? "" : `<button id="next-step" class="btn ${lv.revealed ? "" : "btn-primary"} btn-sm">${lv.revealed ? `Next step <span class="muted mono">${lv.revealed}/${lv.steps.length}</span>` : "Trace the reasoning"}</button>`}
-      ${done && !last ? `<button id="next-level" class="btn btn-primary btn-sm">Next case →</button>` : ""}
+      ${done && !last ? `<button id="next-level" class="btn btn-primary btn-sm">${toData ? "Try the Data pack →" : "Next case →"}</button>` : ""}
     </div>
-    ${done && allSolved ? `<div class="finale"><b>All cases closed.</b>${casePoints()} of ${levels.length * 3} points${progress.finishedAt && progress.startedAt ? ` in ${formatTime(progress.finishedAt - progress.startedAt)}` : ""}. Show your team how you did.<button id="share-result" class="btn btn-primary btn-sm">Share your result</button></div>` : ""}
+    ${done && packSolved(pack) ? `<div class="finale"><b>${isData ? "Data pack closed." : "All core cases closed."}</b>${packPoints(pack)} of ${pack.length * 3} points${!isData && progress.finishedAt && progress.startedAt ? ` in ${formatTime(progress.finishedAt - progress.startedAt)}` : ""}. Show your team how you did.<button id="share-result" class="btn btn-primary btn-sm">Share your result</button></div>` : ""}
   `;
   $("#next-step")?.addEventListener("click", () => {
     lv.revealed++;
@@ -102,8 +107,8 @@ function renderStrip() {
     .map((l, i) => {
       const pts = progress.cases[i];
       const solved = i in progress.cases;
-      return `<button class="lvl ${i === lv.index ? "active" : ""}" data-level="${i}">
-        <span class="row"><span class="${solved ? "check" : ""}">${solved ? CHECK : ""}CASE 0${i + 1}</span>${solved ? `<span class="pips">${[1, 2, 3].map((n) => `<i class="${n <= pts ? "on" : ""}"></i>`).join("")}</span>` : ""}</span>
+      return `<button class="lvl ${l.pack ? "lvl-data" : ""} ${i === lv.index ? "active" : ""}" data-level="${i}">
+        <span class="row"><span class="${solved ? "check" : ""}">${solved ? CHECK : ""}${caseNo(i).toUpperCase()}${l.pack ? `<em class="pack-tag">Data</em>` : ""}</span>${solved ? `<span class="pips">${[1, 2, 3].map((n) => `<i class="${n <= pts ? "on" : ""}"></i>`).join("")}</span>` : ""}</span>
         <span class="name">${esc(l.concept)}</span>
       </button>`;
     })
@@ -137,7 +142,7 @@ function open(index) {
   lv.attempt = attempts[index] ??= { wrong: new Set(), hinted: false };
   lv.steps = steps();
 
-  $("#lv-concept").textContent = `Case 0${index + 1} · ${level.concept}`;
+  $("#lv-concept").textContent = `${caseNo(index)}${level.pack ? " · Data pack" : ""} · ${level.concept}`;
   $("#lv-title").textContent = level.title;
   $("#lv-story").textContent = level.story;
   $("#lv-primer").textContent = level.primer;
@@ -153,21 +158,23 @@ function open(index) {
 
 function answer(i) {
   if (lv.answered !== null || lv.attempt.wrong.has(i)) return;
-  progress.startedAt ??= Date.now();
+  const core = packOf(lv.index) === corePack;
+  if (core) progress.startedAt ??= Date.now();
   if (i !== lv.level.answer) {
     lv.attempt.wrong.add(i);
   } else {
     lv.answered = i;
     lv.firstSolve = !(lv.index in progress.cases);
     if (lv.firstSolve) progress.cases[lv.index] = available();
-    if (solvedCount() === levels.length) progress.finishedAt ??= Date.now();
+    if (packSolved(corePack)) progress.finishedAt ??= Date.now();
     save();
     award("cracker");
-    if (solvedCount() === levels.length) {
+    if (core && packSolved(corePack)) {
       award("detective");
-      if (casePoints() === levels.length * 3) award("flawless");
+      if (packPoints(corePack) === corePack.length * 3) award("flawless");
       if (progress.finishedAt - progress.startedAt <= 4 * 60 * 1000) award("speed");
     }
+    if (!core && packSolved(dataPack)) award("data");
   }
   renderOptions();
   renderStrip();
@@ -190,6 +197,12 @@ export function initDetective() {
     if (i >= 0 && i < lv.level.options.length) answer(i);
     else if (e.key === "Enter" && !e.target.closest("input, select, #lv-options, #lv-feedback, #level-strip")) ($("#next-step") ?? $("#next-level"))?.click();
   });
+  document.addEventListener("change", (e) => {
+    if (!e.target.matches("[data-sql-toggle]")) return;
+    setSqlOn(e.target.checked);
+    document.dispatchEvent(new Event("sql-toggle"));
+  });
+  document.addEventListener("sql-toggle", () => lv && renderFeedback());
   // A progress reset from the profile panel starts the cases over.
   onChange(() => {
     if (!solvedCount() && lv?.answered !== null) open(0);

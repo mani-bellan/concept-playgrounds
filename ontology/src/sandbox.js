@@ -2,6 +2,7 @@
 import { reason, explain, describe, relationLabel, toTurtle } from "./ontology.js";
 import { createGraph, graphModel } from "./graph.js";
 import { presets, missions } from "./data.js";
+import { sqlFor, sqlForContradiction, sqlToggle, sqlNote, sqlBlock } from "./sql.js";
 import { progress, save as saveProgress, award, toast, MISSION_POINTS } from "./progress.js";
 
 const STORE = "ontology-sandbox";
@@ -112,12 +113,12 @@ function renderInsights() {
     box.innerHTML = `<div class="empty-state"><b>Nothing to infer yet</b>Try a subclass chain, or a property with a domain.</div>`;
   } else {
     box.innerHTML =
-      `<p>Select a fact to trace how the reasoner derived it.</p><ul class="facts inferred">` +
+      `<div class="inferred-head"><p>Select a fact to trace how the reasoner derived it.</p>${sqlToggle()}</div>${state.highlight ? sqlNote() : ""}<ul class="facts inferred">` +
       inferred
         .map(([k, f]) => {
           const open = state.highlight?.key === k;
           return `<li class="${open ? "open" : ""}" data-explain="${esc(k)}"><span class="rule">${f.rule}</span>${esc(describe(f))}${
-            open ? `<ol class="why">${explain(result, [k]).map((s) => `<li class="${s.inferred ? "inf" : ""}">${esc(s.inferred ? s.because : describe(s) + " (stated)")}</li>`).join("")}</ol>` : ""
+            open ? `<ol class="why">${explain(result, [k]).map((s) => `<li class="${s.inferred ? "inf" : ""}">${esc(s.inferred ? s.because : describe(s) + " (stated)")}${s.inferred ? sqlBlock(sqlFor(s, result), esc) : ""}</li>`).join("")}</ol>` : ""
           }</li>`;
         })
         .join("") +
@@ -127,7 +128,7 @@ function renderInsights() {
   const probs = result.contradictions;
   $("#problem-count").textContent = probs.length ? probs.length : "";
   $("#sub-problems").innerHTML = probs.length
-    ? probs.map((c) => `<div class="problem">${ALERT_ICON}<span>${esc(c.because)}</span></div>`).join("")
+    ? `<div class="inferred-head"><span></span>${sqlToggle()}</div>` + probs.map((c) => `<div class="problem">${ALERT_ICON}<span>${esc(c.because)}${sqlBlock(sqlForContradiction(c, result), esc)}</span></div>`).join("")
     : `<div class="empty-state"><b>No issues</b>Mark two classes as disjoint, then put one individual in both.</div>`;
   $("#turtle").textContent = toTurtle(state.world);
 
@@ -277,7 +278,7 @@ export function initSandbox() {
     const go = e.target.closest("[data-preset-go]");
     if (go) return $(`[data-preset="${go.dataset.presetGo}"]`).click();
     const t = e.target.closest("[data-del-fact],[data-del-prop],[data-explain]");
-    if (!t) return;
+    if (!t || e.target.closest(".sql")) return; // let people select SQL text without closing the trace
     if (t.dataset.delFact) state.world.facts.splice(+t.dataset.delFact, 1);
     if (t.dataset.delProp) {
       const id = state.world.properties.splice(+t.dataset.delProp, 1)[0].id;
@@ -304,6 +305,8 @@ export function initSandbox() {
       if (b.dataset.sub === "turtle") award("explorer");
     }),
   );
+
+  document.addEventListener("sql-toggle", renderInsights);
 
   update();
 }

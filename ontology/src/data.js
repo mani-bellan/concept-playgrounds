@@ -40,6 +40,28 @@ export const presets = {
       Checkout: [130, 300], Payments: [310, 380], Auth: [490, 300], UsersDB: [660, 380],
     },
   },
+  data: {
+    name: "Data pipeline",
+    world: {
+      classes: ["Asset", "Table", "Dashboard"],
+      individuals: ["raw_orders", "stg_orders", "fct_revenue", "exec_dashboard"],
+      properties: [{ id: "dependsOn", transitive: true }],
+      facts: [
+        { s: "Table", p: "subClassOf", o: "Asset" },
+        { s: "Dashboard", p: "subClassOf", o: "Asset" },
+        { s: "Table", p: "disjointWith", o: "Dashboard" },
+        { s: "raw_orders", p: "type", o: "Table" },
+        { s: "exec_dashboard", p: "type", o: "Dashboard" },
+        { s: "stg_orders", p: "dependsOn", o: "raw_orders" },
+        { s: "fct_revenue", p: "dependsOn", o: "stg_orders" },
+        { s: "exec_dashboard", p: "dependsOn", o: "fct_revenue" },
+      ],
+    },
+    positions: {
+      Asset: [400, 50], Table: [230, 160], Dashboard: [570, 160],
+      raw_orders: [110, 400], stg_orders: [300, 320], fct_revenue: [500, 400], exec_dashboard: [690, 320],
+    },
+  },
   empty: {
     name: "Empty",
     world: { classes: [], individuals: [], properties: [], facts: [] },
@@ -197,7 +219,149 @@ export const levels = [
     takeaway:
       "Two small rules (a domain, then a subclass) combine into a real decision. This is how ontologies power access control, search, and knowledge graphs.",
   },
+
+  // Data pack: the same ideas, in the language of data engineering and analytics.
+  {
+    pack: "data",
+    title: "The Blast Radius",
+    concept: "Lineage & transitivity",
+    primer: `Lineage says which assets are built from which. "dependsOn" is transitive: if a dashboard depends on a model and the model depends on a table, the dashboard depends on the table.`,
+    hint: "Start at raw_orders and follow every path downstream. dim_customers never reads from it.",
+    story:
+      "raw_orders failed to load at 2 AM. Each model dependsOn the assets it reads from, and dependsOn is transitive. Before standup, you need the list of everything showing stale numbers.",
+    world: {
+      classes: [],
+      individuals: ["raw_orders", "stg_orders", "raw_customers", "dim_customers", "fct_revenue", "exec_dashboard"],
+      properties: [{ id: "dependsOn", transitive: true }],
+      facts: [
+        { s: "stg_orders", p: "dependsOn", o: "raw_orders" },
+        { s: "dim_customers", p: "dependsOn", o: "raw_customers" },
+        { s: "fct_revenue", p: "dependsOn", o: "stg_orders" },
+        { s: "fct_revenue", p: "dependsOn", o: "dim_customers" },
+        { s: "exec_dashboard", p: "dependsOn", o: "fct_revenue" },
+      ],
+    },
+    positions: {
+      raw_orders: [100, 100], stg_orders: [360, 100], raw_customers: [100, 400], dim_customers: [360, 400],
+      fct_revenue: [560, 250], exec_dashboard: [670, 420],
+    },
+    question: "Which assets depend on raw_orders?",
+    options: ["Only stg_orders", "stg_orders and fct_revenue", "stg_orders, fct_revenue and exec_dashboard", "All of them, dim_customers too"],
+    answer: 2,
+    targets: ["fct_revenue|dependsOn|raw_orders", "exec_dashboard|dependsOn|raw_orders"],
+    takeaway:
+      "One rule (dependsOn is transitive) gives you impact analysis for any asset. In SQL, that's a recursive query you write for each lineage question.",
+  },
+  {
+    pack: "data",
+    title: "Where Did the PII Go?",
+    concept: "Glossary hierarchies",
+    primer: "Business glossaries often nest terms: an EmailAddress is a kind of ContactInfo, which is a kind of PII. Tag a column with the narrowest term and it belongs to every broader term above it.",
+    hint: "Walk up from EmailAddress: first ContactInfo, then PII.",
+    story:
+      "Analysts tag each column with its most specific term. The glossary says every EmailAddress is ContactInfo, and all ContactInfo is PII. The masking policy only mentions PII.",
+    world: {
+      classes: ["PII", "ContactInfo", "EmailAddress", "Measure"],
+      individuals: ["users.email", "orders.email", "orders.amount"],
+      properties: [],
+      facts: [
+        { s: "ContactInfo", p: "subClassOf", o: "PII" },
+        { s: "EmailAddress", p: "subClassOf", o: "ContactInfo" },
+        { s: "users.email", p: "type", o: "EmailAddress" },
+        { s: "orders.email", p: "type", o: "EmailAddress" },
+        { s: "orders.amount", p: "type", o: "Measure" },
+      ],
+    },
+    positions: {
+      PII: [400, 60], ContactInfo: [400, 180], EmailAddress: [400, 300], Measure: [680, 300],
+      "users.email": [170, 420], "orders.email": [420, 430], "orders.amount": [680, 430],
+    },
+    question: "Which columns does the PII masking policy cover?",
+    options: ["None, no column is tagged PII", "users.email and orders.email", "All three columns"],
+    answer: 1,
+    targets: ["users.email|type|PII", "orders.email|type|PII"],
+    takeaway:
+      "A policy written against a broad term covers every column tagged with a narrower one. Nobody has to remember to tag each level.",
+  },
+  {
+    pack: "data",
+    title: "Who Gets Paged?",
+    concept: "Ownership & inverses",
+    primer: `An inverse property is the same link read from the other end. "growth_team owns fct_signups" and "fct_signups ownedBy growth_team" are one fact.`,
+    hint: "Read the owns arrow backwards.",
+    story:
+      "The team directory records which tables each team owns. The alerting bot works from the table's side: it looks up who fct_signups is ownedBy. The ontology says ownedBy is the inverse of owns.",
+    world: {
+      classes: [],
+      individuals: ["growth_team", "fct_signups"],
+      properties: [
+        { id: "owns", inverseOf: "ownedBy" },
+        { id: "ownedBy", inverseOf: "owns" },
+      ],
+      facts: [{ s: "growth_team", p: "owns", o: "fct_signups" }],
+    },
+    positions: { growth_team: [220, 250], fct_signups: [580, 250] },
+    question: "fct_signups just failed a freshness check. Who gets paged?",
+    options: ["growth_team", "Nobody, ownedBy was never filled in", "Everyone in the data channel"],
+    answer: 0,
+    targets: ["fct_signups|ownedBy|growth_team"],
+    takeaway:
+      "Record ownership once and query it from either side. There's no second mapping table to drift out of sync.",
+  },
+  {
+    pack: "data",
+    title: "The Untyped Feed",
+    concept: "Types from relationships",
+    primer: `A property's domain and range say what kind of thing sits at each end. "placedBy" goes from an Order to a Customer, so any row using it says something about types.`,
+    hint: "ord_981 is at the start of a placedBy arrow; acct_7 is at the end.",
+    story:
+      "A new events feed lands with no type column, just rows like: ord_981 placedBy acct_7. Your ontology says placedBy always goes from an Order to a Customer.",
+    world: {
+      classes: ["Order", "Customer"],
+      individuals: ["ord_981", "acct_7"],
+      properties: [{ id: "placedBy", domain: "Order", range: "Customer" }],
+      facts: [{ s: "ord_981", p: "placedBy", o: "acct_7" }],
+    },
+    positions: { Order: [220, 90], Customer: [580, 90], ord_981: [220, 380], acct_7: [580, 380] },
+    question: "What can the reasoner conclude?",
+    options: ["ord_981 is an Order and acct_7 is a Customer", "Both are Orders", "Nothing, the feed has no types"],
+    answer: 0,
+    targets: ["ord_981|type|Order", "acct_7|type|Customer"],
+    takeaway:
+      "Relationships carry type information even when a source sends none. That helps when you stitch together feeds from systems that model things differently.",
+  },
+  {
+    pack: "data",
+    title: "Two Revenues",
+    concept: "Conflicting metric definitions",
+    primer: "Disjoint classes share no members. If one metric is defined two incompatible ways, the reasoner reports a contradiction instead of letting both dashboards quietly disagree.",
+    hint: "Sales and Finance each classified revenue_q3. Can one metric be both gross and net?",
+    story:
+      "Sales defines revenue_q3 as GrossRevenue (before refunds). Finance's semantic layer defines the same metric as NetRevenue (after refunds). The ontology says no metric is both.",
+    world: {
+      classes: ["Revenue", "GrossRevenue", "NetRevenue"],
+      individuals: ["revenue_q3"],
+      properties: [],
+      facts: [
+        { s: "GrossRevenue", p: "subClassOf", o: "Revenue" },
+        { s: "NetRevenue", p: "subClassOf", o: "Revenue" },
+        { s: "GrossRevenue", p: "disjointWith", o: "NetRevenue" },
+        { s: "revenue_q3", p: "type", o: "GrossRevenue" },
+        { s: "revenue_q3", p: "type", o: "NetRevenue" },
+      ],
+    },
+    positions: { Revenue: [400, 80], GrossRevenue: [210, 240], NetRevenue: [590, 240], revenue_q3: [400, 420] },
+    question: "What does the reasoner report?",
+    options: ["Consistent: revenue is revenue", "Contradiction: revenue_q3 can't be both gross and net", "revenue_q3 is just plain Revenue"],
+    answer: 1,
+    contradiction: true,
+    takeaway:
+      "One name with two meanings is a classic reason dashboards don't match. Disjointness turns that into a reported error; the fix is two clearly named metrics.",
+  },
 ];
+
+export const corePack = levels.map((l, i) => i).filter((i) => !levels[i].pack);
+export const dataPack = levels.map((l, i) => i).filter((i) => levels[i].pack === "data");
 
 // Guided missions for Build a World. They use names that no template uses,
 // so a mission only completes when the player builds it. Names match
