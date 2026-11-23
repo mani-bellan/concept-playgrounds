@@ -1,12 +1,15 @@
 // Player progress shared by every view: Detective cases, sandbox missions,
 // badges, and timing. Stored in localStorage; listeners re-render on change.
 
+import { QUIZ_COUNT, chapters } from "./chapters.js";
+
 const KEY = "ontology-progress-v2";
-const fresh = () => ({ cases: {}, missions: [], badges: [], startedAt: null, finishedAt: null });
+// quiz maps "chapter-question" to the point earned (1 for a first-try answer, else 0).
+const fresh = () => ({ path: null, cases: {}, missions: [], quiz: {}, badges: [], startedAt: null, finishedAt: null });
 
 export const CASE_COUNT = 6;
 export const MISSION_POINTS = 2;
-export const MAX_SCORE = CASE_COUNT * 3 + 6 * MISSION_POINTS;
+export const MAX_SCORE = CASE_COUNT * 3 + 6 * MISSION_POINTS + QUIZ_COUNT;
 
 const icon = (d) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -18,6 +21,7 @@ export const BADGES = [
   { id: "architect", name: "Architect", desc: "Complete all six guided missions.", icon: icon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/>') },
   { id: "detective", name: "Chief Detective", desc: "Solve all six Detective cases.", icon: icon('<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>') },
   { id: "flawless", name: "Flawless", desc: "Solve every case first try, without hints.", icon: icon('<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 18 3-18"/>') },
+  { id: "graduate", name: "Graduate", desc: "Complete all six course chapters.", icon: icon('<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/>') },
   { id: "speed", name: "Speedrunner", desc: "Solve all six cases within 4 minutes.", icon: icon('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>') },
 ];
 
@@ -40,8 +44,25 @@ export function save() {
 }
 
 export const casePoints = () => Object.values(progress.cases).reduce((a, b) => a + b, 0);
-export const score = () => casePoints() + progress.missions.length * MISSION_POINTS;
+export const quizPoints = () => Object.values(progress.quiz).reduce((a, b) => a + b, 0);
+export const score = () => casePoints() + progress.missions.length * MISSION_POINTS + quizPoints();
 export const solvedCount = () => Object.keys(progress.cases).length;
+
+// Steps in a course chapter: its missions, its cases, and its quiz questions.
+export function chapterSteps(c) {
+  const ch = chapters[c];
+  const list = [
+    ...ch.missions.map((id) => progress.missions.includes(id)),
+    ...ch.cases.map((i) => i in progress.cases),
+    ...ch.quiz.map((_, q) => `${c}-${q}` in progress.quiz),
+  ];
+  return { done: list.filter(Boolean).length, total: list.length };
+}
+export const chapterComplete = (c) => {
+  const s = chapterSteps(c);
+  return s.done === s.total;
+};
+export const chaptersDone = () => chapters.filter((_, c) => chapterComplete(c)).length;
 
 export function award(id) {
   if (progress.badges.includes(id)) return;
@@ -52,7 +73,7 @@ export function award(id) {
 }
 
 export function resetProgress() {
-  Object.assign(progress, fresh());
+  Object.assign(progress, fresh(), { path: progress.path });
   save();
 }
 

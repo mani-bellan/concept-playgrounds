@@ -1,12 +1,13 @@
 // Profile panel: score, badges, and a shareable result card.
-import { progress, BADGES, MAX_SCORE, CASE_COUNT, score, solvedCount, onChange, resetProgress, formatTime, toast } from "./progress.js";
+import { progress, BADGES, MAX_SCORE, CASE_COUNT, score, solvedCount, chaptersDone, onChange, resetProgress, formatTime, toast } from "./progress.js";
+import { chapters } from "./chapters.js";
 import { missions } from "./data.js";
 
 const $ = (sel) => document.querySelector(sel);
 const appUrl = () => location.origin + location.pathname;
 
 function shareText() {
-  return `I scored ${score()}/${MAX_SCORE} on Ontology Playground: ${solvedCount()}/${CASE_COUNT} detective cases, ${progress.missions.length}/${missions.length} missions, ${progress.badges.length}/${BADGES.length} badges. Learn what an ontology is by building one:`;
+  return `I scored ${score()}/${MAX_SCORE} on Ontology Playground: ${chaptersDone()}/${chapters.length} chapters, ${solvedCount()}/${CASE_COUNT} detective cases, ${progress.missions.length}/${missions.length} missions, ${progress.badges.length}/${BADGES.length} badges. Learn what an ontology is by building one:`;
 }
 
 function renderHeader() {
@@ -14,13 +15,12 @@ function renderHeader() {
 }
 
 function renderPanel() {
-  const time = progress.finishedAt && progress.startedAt ? formatTime(progress.finishedAt - progress.startedAt) : "—";
   $("#profile-body").innerHTML = `
     <div class="stat-grid">
       <div><span class="mono label">Score</span><b>${score()}<small>/${MAX_SCORE}</small></b></div>
+      <div><span class="mono label">Chapters</span><b>${chaptersDone()}<small>/${chapters.length}</small></b></div>
       <div><span class="mono label">Cases</span><b>${solvedCount()}<small>/${CASE_COUNT}</small></b></div>
       <div><span class="mono label">Missions</span><b>${progress.missions.length}<small>/${missions.length}</small></b></div>
-      <div><span class="mono label">Case time</span><b>${time}</b></div>
     </div>
     <div class="pane-title">Badges <span class="muted">${progress.badges.length} of ${BADGES.length}</span></div>
     <div class="badge-grid">${BADGES.map((b) => {
@@ -77,7 +77,7 @@ async function drawCard(canvas) {
   const time = progress.finishedAt && progress.startedAt ? ` in ${formatTime(progress.finishedAt - progress.startedAt)}` : "";
   c.font = "500 28px Inter, sans-serif";
   c.fillStyle = "#b4b4bc";
-  c.fillText(`${solvedCount()}/${CASE_COUNT} detective cases${time}  ·  ${progress.missions.length}/${missions.length} missions`, 80, 410);
+  c.fillText(`${chaptersDone()}/${chapters.length} chapters  ·  ${solvedCount()}/${CASE_COUNT} cases${time}  ·  ${progress.missions.length}/${missions.length} missions`, 80, 410);
 
   // Badge row: earned badges in colour with their icons, locked ones dimmed.
   const icons = await Promise.all(

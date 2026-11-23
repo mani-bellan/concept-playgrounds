@@ -17,12 +17,12 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
+    <div class="brand" data-tab="learn" role="link" tabindex="0" title="Overview">
       <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="3.2" fill="var(--ind)"/><circle cx="18" cy="7" r="3.2" fill="var(--class)"/><circle cx="18" cy="18" r="2.2" fill="var(--inf)"/><path d="M8.5 15 15.5 9M8.8 17.4h6.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <span>Ontology Playground</span>
     </div>
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="learn"><span class="long">Overview</span><span class="short">Learn</span></button>
+      <button class="tab" data-tab="course">Course</button>
       <button class="tab" data-tab="sandbox"><span class="long">Build a World</span><span class="short">Build</span></button>
       <button class="tab" data-tab="detective">Detective</button>
     </nav>
@@ -39,6 +39,10 @@
   </header>
 
   <main>
+    <button id="back-bar" class="back-bar" hidden>
+      <svg viewBox="0 0 16 16" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      <span></span>
+    </button>
     <!-- Overview -->
     <section id="view-learn" class="view active">
       <div class="hero">
@@ -47,10 +51,10 @@
           <h1>Ontologies, explained by <span class="grad">building one.</span></h1>
           <p class="lede">An ontology is a shared, machine-readable model of a domain: the kinds of things that exist, how they relate, and the rules that hold. Give it to a reasoner and it derives facts nobody wrote down.</p>
           <div class="hero-cta">
-            <button class="btn btn-primary btn-lg" data-goto="sandbox">Start building
+            <button class="btn btn-primary btn-lg" data-goto="course">Start the course
               <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <button class="btn btn-ghost btn-lg" data-goto="detective">Solve 6 cases</button>
+            <button class="btn btn-ghost btn-lg" data-goto="sandbox">Open the sandbox</button>
           </div>
           <dl class="stats">
             <div><dt>4</dt><dd>core concepts</dd></div>
@@ -72,9 +76,9 @@
           <p>An <b>ontology</b> is that briefing, written so a computer can read it. A <b>reasoner</b> is the colleague who works out the answers. No maths or code needed here: you'll build one by clicking.</p>
         </div>
         <ol class="path">
-          <li><span class="mono">01</span><div><b>Learn the 4 ideas</b><span>Read the cards below · 2 min</span></div></li>
-          <li data-goto="sandbox"><span class="mono">02</span><div><b>Do the guided missions</b><span>Build your first ontology · 5 min</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
-          <li data-goto="detective"><span class="mono">03</span><div><b>Test yourself</b><span>Six detective cases · 5 min</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
+          <li data-goto="course"><span class="mono">01</span><div><b>Take the course</b><span>Six short chapters, everyday or tech examples · 27 min</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
+          <li data-goto="sandbox"><span class="mono">02</span><div><b>Experiment freely</b><span>Model anything in Build a World</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
+          <li data-goto="detective"><span class="mono">03</span><div><b>Test yourself</b><span>Six detective cases in Detective</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
         </ol>
       </div>
 
@@ -131,6 +135,9 @@
         </div>
       </div>
     </section>
+
+    <!-- Course -->
+    <section id="view-course" class="view"><div id="course"></div></section>
 
     <!-- Sandbox -->
     <section id="view-sandbox" class="view">

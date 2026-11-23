@@ -199,3 +199,5 @@ export function initDetective() {
   const firstUnsolved = levels.findIndex((_, i) => !(i in progress.cases));
   open(firstUnsolved === -1 ? 0 : firstUnsolved);
 }
+
+export { open as openCase };

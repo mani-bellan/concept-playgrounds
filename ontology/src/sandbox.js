@@ -307,3 +307,7 @@ export function initSandbox() {
 
   update();
 }
+
+export function showMissions() {
+  $('.subtab[data-sub="missions"]').click();
+}
