@@ -12,6 +12,8 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const CHECK = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ARROW = `<svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`;
 
+const ISSUE_URL = "https://github.com/mani-bellan/concept-playgrounds/issues/new";
+
 let current = null; // open chapter index, or null for the chapter list
 const wrong = {}; // quiz key -> Set of wrong option indexes this session
 
@@ -56,7 +58,8 @@ function renderHome() {
           ${ARROW}
         </button></li>`;
       })
-      .join("")}</ol>`;
+      .join("")}</ol>
+    <p class="course-note">This playground teaches a simplified subset of OWL: classes, subclasses, domain, range, transitive and inverse properties, and disjointness. Real reasoners support much more. Every chapter links its sources; <a href="${ISSUE_URL}" target="_blank" rel="noopener">report anything that looks wrong</a>.</p>`;
 }
 
 // Display order of quiz options, varied per question so the answer isn't always first.
@@ -119,6 +122,11 @@ function renderChapter(c) {
           <span class="mono label">Example</span>
           <ul>${ex.facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>
           <div class="conclusion"><span class="rule">Reasoner</span>${esc(ex.conclusion)}</div>
+        </div>
+        <div class="sources">
+          <span class="mono label">Sources</span>
+          ${ch.sources.map((src) => `<a href="${src.url}" target="_blank" rel="noopener">${esc(src.label)}</a>`).join("")}
+          <a class="report" href="${ISSUE_URL}?title=${encodeURIComponent(`Content issue: Chapter 0${c + 1} · ${ch.title}`)}" target="_blank" rel="noopener">Spotted a mistake? Report it</a>
         </div>
       </article>
       <div class="chapter-side">

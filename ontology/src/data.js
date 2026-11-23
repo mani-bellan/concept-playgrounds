@@ -71,7 +71,7 @@ export const levels = [
     answer: 0,
     targets: ["Rex|type|Animal"],
     takeaway:
-      "Subclasses pass their meaning upward. You only state \"Rex is a Dog\"; the ontology knows the rest. A plain database would need that row written out.",
+      "Subclasses pass their meaning upward. You only state \"Rex is a Dog\"; the reasoner works out the rest. A plain database would need that fact stored or computed by a query.",
   },
   {
     title: "Who's Who in the Classroom",

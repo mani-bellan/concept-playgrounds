@@ -34,6 +34,7 @@ export const chapters = [
       { q: "Every Cat is an Animal. Tom is a Cat. What can a reasoner conclude?", options: ["Tom is an Animal", "Every Animal is a Cat", "Nothing new"], answer: 0, why: "Subclass links carry members upward, so Tom is also an Animal." },
       { q: "What does a reasoner add that a plain list of facts doesn't?", options: ["It works out new facts from rules", "It stores data faster", "It draws diagrams"], answer: 0, why: "A reasoner reads your rules and works out what else must be true." },
     ],
+    sources: [{ label: "W3C OWL 2 Primer", url: "https://www.w3.org/TR/owl2-primer/" }],
   },
   {
     title: "Relationships",
@@ -60,6 +61,7 @@ export const chapters = [
       { q: "The range of “owns” is Vehicle. Asha owns Zippy. What follows?", options: ["Zippy is a Vehicle", "Asha is a Vehicle", "Nothing"], answer: 0, why: "The range classifies whatever sits at the end of the arrow." },
       { q: "What does a domain describe?", options: ["What kind of thing can start the relationship", "How many links are allowed", "Which database stores it"], answer: 0, why: "Domain is the start of the arrow; range is the end." },
     ],
+    sources: [{ label: "W3C OWL 2 Primer", url: "https://www.w3.org/TR/owl2-primer/" }],
   },
   {
     title: "Rules that chain",
@@ -86,6 +88,7 @@ export const chapters = [
       { q: "“parent of” and “child of” are…", options: ["Inverse properties", "Transitive properties", "Disjoint classes"], answer: 0, why: "They describe the same link read from opposite ends." },
       { q: "Which relationship is most likely transitive?", options: ["is located in", "is married to", "has a birthday on"], answer: 0, why: "A street in a city in a country is in that country." },
     ],
+    sources: [{ label: "W3C OWL 2 Primer", url: "https://www.w3.org/TR/owl2-primer/" }],
   },
   {
     title: "Catching bad data",
@@ -98,12 +101,12 @@ export const chapters = [
       ],
       tech: [
         "Disjointness axioms turn silent data-quality bugs into explicit errors.",
-        "A record that ends up typed as both Individual and Organisation, perhaps through a domain rule on hasPassport, is flagged as inconsistent. It works like an integrity check, but it also covers facts that were only inferred.",
+        "If a record ends up typed as both Individual and Organisation, perhaps through a domain rule on hasPassport, the ontology becomes inconsistent and the reasoner can point to the facts that caused it. It works like an integrity check that also covers facts that were only inferred.",
       ],
     },
     example: {
       everyday: { facts: ["Nothing is both a Person and a Company", "Only a Person has a date of birth", "Acme Ltd is a Company, with a date of birth"], conclusion: "Contradiction: Acme Ltd would have to be a Person and a Company. Someone filled the form in wrong." },
-      tech: { facts: ["Individual disjointWith Organisation", "hasPassport domain Individual", "acme type Organisation; acme hasPassport p_9"], conclusion: "The reasoner reports acme as inconsistent. Fix the source record." },
+      tech: { facts: ["Individual disjointWith Organisation", "hasPassport domain Individual", "acme type Organisation; acme hasPassport p_9"], conclusion: "The reasoner reports an inconsistency and traces it to acme's facts. Fix the source record." },
     },
     missions: ["contradiction"],
     cases: [4],
@@ -112,6 +115,7 @@ export const chapters = [
       { q: "A reasoner reports a contradiction. What's the usual cause?", options: ["Wrong or conflicting data", "The computer is broken", "Too many classes"], answer: 0, why: "The rules are usually fine; one of the facts is wrong." },
       { q: "Why is a contradiction useful?", options: ["It exposes errors you might never notice", "It makes queries faster", "It hides bad records"], answer: 0, why: "It turns a silent mistake into a visible one." },
     ],
+    sources: [{ label: "W3C OWL 2 Primer", url: "https://www.w3.org/TR/owl2-primer/" }],
   },
   {
     title: "Ontologies in the real world",
@@ -119,17 +123,17 @@ export const chapters = [
     summary: "Schema.org, Wikidata, and healthcare.",
     lesson: {
       everyday: [
-        "You use ontologies daily without seeing them. When Google shows a recipe card with cooking time and ratings, it's reading Schema.org, a shared vocabulary millions of websites use to describe recipes, events, and products.",
-        "Wikidata describes over 100 million things, from rivers to film stars, in one connected graph. Hospitals use SNOMED CT so that “heart attack” and “myocardial infarction” mean the same thing everywhere.",
+        "You use ontologies daily without seeing them. When Google shows a recipe card with cooking time and ratings, it's reading Schema.org, a shared vocabulary that over 45 million websites use to describe recipes, events, and products.",
+        "Wikidata describes over 120 million items, from rivers to film stars, in one connected graph. Health systems in more than 80 countries use SNOMED CT, where “heart attack” and “myocardial infarction” are two names for the same concept.",
       ],
       tech: [
-        "Schema.org is a lightweight ontology embedded as JSON-LD in web pages; search engines use it for rich results. Wikidata is a public knowledge graph you can query with SPARQL.",
-        "In healthcare, SNOMED CT is an OWL ontology with hundreds of thousands of concepts, and HL7 FHIR records refer to it. Reusing an existing vocabulary nearly always beats inventing your own.",
+        "Schema.org is a lightweight vocabulary, usually embedded as JSON-LD in web pages; search engines use it for rich results. Wikidata is a public knowledge graph you can query with SPARQL.",
+        "In healthcare, SNOMED CT is a clinical terminology of over 360,000 concepts whose definitions are based on description logic; it can be converted to OWL 2 for reasoning, and HL7 FHIR records commonly use its codes. Reusing an existing vocabulary is usually better than inventing your own.",
       ],
     },
     example: {
-      everyday: { facts: ["A web page says it is a Recipe", "Its cooking time is 30 minutes", "Its rating is 4.8"], conclusion: "So Google can show it as a recipe card with the time and stars." },
-      tech: { facts: ['{ "@type": "Recipe",', '  "cookTime": "PT30M",', '  "aggregateRating": { "ratingValue": 4.8 } }'], conclusion: "Schema.org JSON-LD makes the page eligible for a recipe rich result." },
+      everyday: { facts: ["A web page says it is a Recipe", "Its cooking time is 30 minutes", "Its rating is 4.8"], conclusion: "So search engines understand the page, and Google may show it as a recipe card with the time and stars." },
+      tech: { facts: ['{ "@context": "https://schema.org",', '  "@type": "Recipe", "cookTime": "PT30M",', '  "aggregateRating": { "@type": "AggregateRating", "ratingValue": 4.8, "ratingCount": 212 } }'], conclusion: "Search engines read this Schema.org JSON-LD; with the other required fields, the page can qualify for a recipe rich result." },
     },
     missions: [],
     cases: [],
@@ -138,6 +142,7 @@ export const chapters = [
       { q: "Why do hospitals share an ontology like SNOMED CT?", options: ["So the same condition means the same thing everywhere", "To make records longer", "To replace doctors"], answer: 0, why: "Shared meaning lets records move safely between systems." },
       { q: "Before inventing your own ontology, you should…", options: ["Check whether a shared one already exists", "Write it in a spreadsheet", "Keep it secret"], answer: 0, why: "Reusing a standard makes your data understandable to others." },
     ],
+    sources: [{ label: "Schema.org", url: "https://schema.org/" }, { label: "Google: Recipe structured data", url: "https://developers.google.com/search/docs/appearance/structured-data/recipe" }, { label: "Wikidata statistics", url: "https://www.wikidata.org/wiki/Wikidata:Statistics" }, { label: "SNOMED International: What is SNOMED CT", url: "https://www.snomed.org/what-is-snomed-ct" }, { label: "SNOMED CT and description logic", url: "https://docs.snomed.org/snomed-ct-practical-guides/snomed-ct-data-analytics-guide/6-snomed-ct-analytic-techniques/6.4-description-logic-over-terminology" }, { label: "HL7 FHIR: Using SNOMED CT", url: "https://hl7.org/fhir/snomedct.html" }],
   },
   {
     title: "Ontologies at work",
@@ -146,11 +151,11 @@ export const chapters = [
     lesson: {
       everyday: [
         "Small rules add up to real decisions. A lab door can open for anyone who's authorised, where researchers count as authorised and anyone working on an experiment counts as a researcher.",
-        "Search engines use the same idea to know a sofa is a kind of furniture. And AI assistants answer more reliably when they can check facts against a knowledge graph instead of guessing.",
+        "Search engines use the same idea to know a sofa is a kind of furniture. And AI assistants tend to answer more reliably when they can check facts against a knowledge graph instead of guessing.",
       ],
       tech: [
-        "Ontology-backed rules drive attribute-based access control, semantic search that expands queries over subclass hierarchies, and data integration across teams.",
-        "In AI pipelines a knowledge graph grounds the model: retrieve the relevant entities and relations, put them in the prompt, and the model cites facts instead of inventing them. This is often called GraphRAG.",
+        "Ontology-backed rules can drive attribute-based access control, semantic search that expands queries over subclass hierarchies, and data integration across teams.",
+        "In AI pipelines a knowledge graph can ground the model: retrieve the relevant entities and relations, put them in the prompt, and the answer rests on known facts. It doesn't make mistakes impossible, but it makes them rarer and easier to trace. Graph-based retrieval like this is sometimes called GraphRAG.",
       ],
     },
     example: {
@@ -160,10 +165,11 @@ export const chapters = [
     missions: [],
     cases: [5],
     quiz: [
-      { q: "How can a knowledge graph help an AI assistant?", options: ["It gives the AI real facts to check against", "It makes the AI type faster", "It replaces the AI"], answer: 0, why: "Grounding answers in known facts reduces made-up answers." },
+      { q: "How can a knowledge graph help an AI assistant?", options: ["It gives the AI real facts to check against", "It makes the AI type faster", "It replaces the AI"], answer: 0, why: "Grounding answers in known facts makes made-up answers less likely, though not impossible." },
       { q: "A search for “furniture” also returns sofas because…", options: ["Sofa is a subclass of Furniture", "The words look similar", "Sofas are popular"], answer: 0, why: "Search can expand a query to every subclass." },
       { q: "In the lab-door case, which two rules combined?", options: ["A domain rule and a subclass rule", "Two inverse rules", "A disjointness rule and a range rule"], answer: 0, why: "worksOn's domain makes Alice a Researcher; Researcher ⊑ LabAuthorized does the rest." },
     ],
+    sources: [{ label: "W3C OWL 2 Primer", url: "https://www.w3.org/TR/owl2-primer/" }, { label: "Microsoft Research: GraphRAG", url: "https://microsoft.github.io/graphrag/" }],
   },
 ];
 

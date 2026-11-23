@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ontology Playground · Learn ontologies by building one</title>
-  <meta name="description" content="An interactive primer on ontologies for engineers: build a world, run a reasoner, and solve inference puzzles." />
+  <meta name="description" content="An interactive primer on ontologies for everyone: build a world, run a reasoner, and solve inference puzzles." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -47,7 +47,7 @@
     <section id="view-learn" class="view active">
       <div class="hero">
         <div class="hero-copy">
-          <div class="eyebrow"><span class="pulse"></span>Interactive primer for engineers</div>
+          <div class="eyebrow"><span class="pulse"></span>Interactive primer · no background needed</div>
           <h1>Ontologies, explained by <span class="grad">building one.</span></h1>
           <p class="lede">An ontology is a shared, machine-readable model of a domain: the kinds of things that exist, how they relate, and the rules that hold. Give it to a reasoner and it derives facts nobody wrote down.</p>
           <div class="hero-cta">
@@ -120,8 +120,8 @@
       <dl class="decoder">
         <div><dt>Reasoner</dt><dd>The program that reads your rules and works out new facts.</dd></div>
         <div><dt>Subclass</dt><dd>A narrower kind. Every Dog is an Animal, so Dog is a subclass of Animal.</dd></div>
-        <div><dt>Domain</dt><dd>What kind of thing can sit at the start of a relationship. Only a Person can "own".</dd></div>
-        <div><dt>Range</dt><dd>What kind of thing sits at the end of a relationship. You can only "own" a Thing.</dd></div>
+        <div><dt>Domain</dt><dd>The type given to whatever starts a relationship. If the domain of "owns" is Person, anyone who owns something is a Person.</dd></div>
+        <div><dt>Range</dt><dd>The type given to whatever a relationship points to. If the range of "owns" is Vehicle, anything owned is a Vehicle.</dd></div>
         <div><dt>Transitive</dt><dd>A relationship that chains: inside a box inside a room means inside the room.</dd></div>
         <div><dt>Inverse</dt><dd>The same link read backwards: "parent of" and "child of".</dd></div>
         <div><dt>Disjoint</dt><dd>Two classes with no members in common. Nothing is both a Cat and a Dog.</dd></div>
@@ -166,8 +166,8 @@
           <div class="pane-title"><span class="step">2</span>Define a property <span class="opt-label">optional</span></div>
           <form id="add-prop" class="grid-form">
             <input name="pid" placeholder="Name, e.g. owns" required maxlength="24" autocomplete="off" class="span2" />
-            <label><span class="term" tabindex="0" data-tip="What can sit at the start: only this class can use the property.">Domain</span><select name="domain"></select></label>
-            <label><span class="term" tabindex="0" data-tip="What sits at the end: whatever the property points to is this class.">Range</span><select name="range"></select></label>
+            <label><span class="term" tabindex="0" data-tip="Whatever starts this relationship is given this class.">Domain</span><select name="domain"></select></label>
+            <label><span class="term" tabindex="0" data-tip="Whatever this relationship points to is given this class.">Range</span><select name="range"></select></label>
             <label><span class="term" tabindex="0" data-tip="The same link read backwards, like parent of / child of.">Inverse of</span><select name="inverseOf"></select></label>
             <label class="toggle"><input type="checkbox" name="transitive" /><span></span><span class="term" tabindex="0" data-tip="Chains through steps: A→B and B→C gives A→C.">Transitive</span></label>
             <button class="btn btn-sm span2"><i class="sw sw-prop"></i>Add property</button>

@@ -22,8 +22,8 @@ const graph = createGraph($("#detective-graph"), {
 function propertyRules(p) {
   const a = (w) => (/^[AEIOU]/i.test(w) ? "an " : "a ") + w;
   const rules = [];
-  if (p.domain) rules.push(`Only ${a(p.domain)} can "${p.id}" something`);
-  if (p.range) rules.push(`Whatever is "${p.id}" by something is ${a(p.range)}`);
+  if (p.domain) rules.push(`Anything that ${p.id} something is ${a(p.domain)} (domain)`);
+  if (p.range) rules.push(`Anything at the receiving end of "${p.id}" is ${a(p.range)} (range)`);
   if (p.transitive) rules.push(`"${p.id}" is transitive: it chains through intermediate steps`);
   if (p.inverseOf) rules.push(`"${p.id}" is the inverse of "${p.inverseOf}"`);
   return rules;

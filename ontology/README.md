@@ -27,3 +27,9 @@ python3 -m http.server 8000
 - `src/course.js`: the Course tab
 - `src/nav.js`: view switching and the Back to chapter bar
 - `src/data.js`: sandbox presets, Detective levels, and guided missions; add a level by appending to `levels`
+
+## Content accuracy
+
+- `node --test tests/` checks that every Detective answer is what the reasoner concludes, that the guided missions complete when built as instructed, and that course chapters link real missions, cases, and sources. Run it after editing `src/data.js` or `src/chapters.js`.
+- Every chapter lists its sources (W3C OWL 2 Primer, Schema.org, Wikidata, SNOMED International, HL7 FHIR, Microsoft GraphRAG). Re-check numbers such as Wikidata's item count when updating; they were verified in November 2026.
+- The playground teaches a simplified subset of OWL and says so in the Course. Learners can report mistakes through GitHub issues.

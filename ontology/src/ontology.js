@@ -73,10 +73,10 @@ export function reason(world) {
       const p = props.get(r.p);
       if (p.domain)
         changed |= add({ s: r.s, p: "type", o: p.domain }, "Domain", [r],
-          `Only ${an(p.domain)} can "${p.id}" something. ${r.s} ${p.id} ${r.o}, so ${r.s} is ${an(p.domain)}.`);
+          `The domain of "${p.id}" is ${p.domain}: anything that ${p.id} something is ${an(p.domain)}. ${r.s} ${p.id} ${r.o}, so ${r.s} is ${an(p.domain)}.`);
       if (p.range)
         changed |= add({ s: r.o, p: "type", o: p.range }, "Range", [r],
-          `Only ${an(p.range)} can be "${p.id}" by something. ${r.s} ${p.id} ${r.o}, so ${r.o} is ${an(p.range)}.`);
+          `The range of "${p.id}" is ${p.range}: anything at the receiving end of "${p.id}" is ${an(p.range)}. ${r.s} ${p.id} ${r.o}, so ${r.o} is ${an(p.range)}.`);
       if (inverse.has(r.p)) {
         const q = inverse.get(r.p);
         changed |= add({ s: r.o, p: q, o: r.s }, "Inverse", [r],
