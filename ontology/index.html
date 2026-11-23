@@ -3,128 +3,209 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ontology Playground</title>
+  <title>Ontology Playground · Learn ontologies by building one</title>
+  <meta name="description" content="An interactive primer on ontologies for engineers: build a world, run a reasoner, and solve inference puzzles." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0b'/%3E%3Ccircle cx='10' cy='22' r='4' fill='%2334d399'/%3E%3Ccircle cx='22' cy='10' r='4' fill='%237c9cff'/%3E%3Cpath d='M13 19l6-6' stroke='%23ededef' stroke-width='2'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="src/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="logo">◈</span> Ontology Playground</div>
-    <nav>
-      <button class="tab active" data-tab="learn">Learn</button>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="3.2" fill="var(--ind)"/><circle cx="18" cy="7" r="3.2" fill="var(--class)"/><circle cx="18" cy="18" r="2.2" fill="var(--inf)"/><path d="M8.5 15 15.5 9M8.8 17.4h6.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>Ontology Playground</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="learn">Overview</button>
       <button class="tab" data-tab="sandbox">Build a World</button>
-      <button class="tab" data-tab="detective">Ontology Detective</button>
+      <button class="tab" data-tab="detective">Detective</button>
     </nav>
-    <div class="score" id="score" title="Detective score">★ 0</div>
+    <div class="top-right">
+      <span class="score" id="score" title="Detective score">0 pts</span>
+      <a class="icon-link" href="https://github.com/mani-bellan/concept-playgrounds" target="_blank" rel="noopener" aria-label="Source on GitHub">
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+    </div>
   </header>
 
   <main>
-    <!-- Learn -->
+    <!-- Overview -->
     <section id="view-learn" class="view active">
       <div class="hero">
-        <h1>An ontology is a shared model of what exists in a domain, written so machines can reason with it.</h1>
-        <p>It names the <b>kinds of things</b>, the <b>things themselves</b>, how they <b>relate</b>, and the <b>rules</b> that hold. From those rules a reasoner can work out facts nobody typed in.</p>
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse"></span>Interactive primer for engineers</div>
+          <h1>Ontologies, explained by <span class="grad">building one.</span></h1>
+          <p class="lede">An ontology is a shared, machine-readable model of a domain: the kinds of things that exist, how they relate, and the rules that hold. Give it to a reasoner and it derives facts nobody wrote down.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary btn-lg" data-goto="sandbox">Start building
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-lg" data-goto="detective">Solve 6 cases</button>
+          </div>
+          <dl class="stats">
+            <div><dt>4</dt><dd>core concepts</dd></div>
+            <div><dt>7</dt><dd>inference rules</dd></div>
+            <div><dt>OWL</dt><dd>standard export</dd></div>
+          </dl>
+        </div>
+        <figure class="hero-demo">
+          <figcaption><span class="dot-live"></span>reasoner.run()<span class="muted" id="hero-count"></span></figcaption>
+          <svg id="hero-graph" class="graph"></svg>
+          <div class="demo-foot mono"><span class="k">given</span> Rex is a Dog <span class="sep">→</span> <span class="k inf">inferred</span> Rex is an Animal</div>
+        </figure>
+      </div>
+
+      <div class="section-head">
+        <span class="mono label">The building blocks</span>
+        <h2>Four ideas. That's the whole model.</h2>
       </div>
       <div class="cards">
-        <article class="card"><div class="chip chip-class">Class</div><h3>Kinds of things</h3><p>Categories like <code>Dog</code>, <code>Service</code>, or <code>Customer</code>.</p><p class="eg">≈ a table, a type, or an interface</p></article>
-        <article class="card"><div class="chip chip-ind">Individual</div><h3>Actual things</h3><p>Specific members like <code>Rex</code> or <code>Checkout</code>.</p><p class="eg">≈ a row, or an object instance</p></article>
-        <article class="card"><div class="chip chip-prop">Property</div><h3>Relationships</h3><p>Links like <code>owns</code> or <code>dependsOn</code>, with rules about what they connect.</p><p class="eg">≈ a foreign key, but with meaning</p></article>
-        <article class="card"><div class="chip chip-inf">Inference</div><h3>Rules → new facts</h3><p>"Every Dog is an Animal" + "Rex is a Dog" ⇒ "Rex is an Animal".</p><p class="eg">This is what a schema alone can't do</p></article>
+        <article class="card">
+          <div class="card-top"><span class="num mono">01</span><span class="tag tag-class">Class</span></div>
+          <h3>Kinds of things</h3>
+          <p>Categories such as <code>Dog</code>, <code>Service</code>, or <code>Customer</code>, arranged in a hierarchy.</p>
+          <div class="analogy mono">≈ table · type · interface</div>
+        </article>
+        <article class="card">
+          <div class="card-top"><span class="num mono">02</span><span class="tag tag-ind">Individual</span></div>
+          <h3>Actual things</h3>
+          <p>Specific members of a class, such as <code>Rex</code> or the <code>Checkout</code> service.</p>
+          <div class="analogy mono">≈ row · object instance</div>
+        </article>
+        <article class="card">
+          <div class="card-top"><span class="num mono">03</span><span class="tag tag-prop">Property</span></div>
+          <h3>Relationships</h3>
+          <p>Typed links such as <code>owns</code> or <code>dependsOn</code>, with rules about what they connect.</p>
+          <div class="analogy mono">≈ foreign key, with meaning</div>
+        </article>
+        <article class="card">
+          <div class="card-top"><span class="num mono">04</span><span class="tag tag-inf">Inference</span></div>
+          <h3>Rules produce facts</h3>
+          <p><em>Every Dog is an Animal</em> and <em>Rex is a Dog</em> together entail <em>Rex is an Animal</em>.</p>
+          <div class="analogy mono">≈ what a schema can't do</div>
+        </article>
       </div>
-      <div class="cta">
-        <button class="big" data-goto="sandbox">Build a World →<small>Drag, connect, and watch the reasoner think</small></button>
-        <button class="big alt" data-goto="detective">Ontology Detective →<small>6 short puzzles, one idea each</small></button>
+
+      <div class="where">
+        <span class="mono label">Where you'll meet them</span>
+        <div class="logos">
+          <span>Schema.org</span><span>Wikidata</span><span>SNOMED CT</span><span>HL7 FHIR</span><span>Enterprise knowledge graphs</span><span>RAG pipelines</span>
+        </div>
       </div>
-      <p class="footnote">Where you'll meet ontologies: Schema.org markup on web pages, Wikidata, FHIR and SNOMED in healthcare, enterprise knowledge graphs, and the data feeding search and LLM retrieval. The "Behind the scenes" tab in the sandbox shows the real standard format (OWL in Turtle syntax).</p>
     </section>
 
     <!-- Sandbox -->
     <section id="view-sandbox" class="view">
-      <aside class="panel side">
-        <div class="presets">
-          <span>Start from:</span>
-          <button data-preset="pets">Pets</button>
-          <button data-preset="services">Microservices</button>
-          <button data-preset="empty">Empty</button>
+      <aside class="pane side">
+        <div class="pane-section">
+          <div class="pane-title">Template</div>
+          <div class="segmented presets">
+            <button data-preset="pets">Pets</button>
+            <button data-preset="services">Microservices</button>
+            <button data-preset="empty">Blank</button>
+          </div>
         </div>
 
-        <h4>1. Add a thing</h4>
-        <form id="add-node">
-          <div class="row"><input name="label" placeholder="e.g. Dog or Rex" required maxlength="24" /></div>
-          <div class="row">
-            <button name="kind" value="class" class="chip-class">+ Class</button>
-            <button name="kind" value="individual" class="chip-ind">+ Individual</button>
-          </div>
-        </form>
+        <div class="pane-section">
+          <div class="pane-title"><span class="step">1</span>Add an entity</div>
+          <form id="add-node">
+            <input name="label" placeholder="Name, e.g. Dog or Rex" required maxlength="24" autocomplete="off" />
+            <div class="btn-row">
+              <button name="kind" value="class" class="btn btn-sm"><i class="sw sw-class"></i>Class</button>
+              <button name="kind" value="individual" class="btn btn-sm"><i class="sw sw-ind"></i>Individual</button>
+            </div>
+          </form>
+        </div>
 
-        <h4>2. Define a property <span class="muted">(optional)</span></h4>
-        <form id="add-prop">
-          <div class="row"><input name="pid" placeholder="e.g. owns" required maxlength="24" /></div>
-          <div class="row small">
-            <label>domain <select name="domain"></select></label>
-            <label>range <select name="range"></select></label>
-          </div>
-          <div class="row small">
-            <label>inverse of <select name="inverseOf"></select></label>
-            <label class="check"><input type="checkbox" name="transitive" /> transitive</label>
-            <button class="chip-prop">+ Property</button>
-          </div>
-        </form>
+        <div class="pane-section">
+          <div class="pane-title"><span class="step">2</span>Define a property <span class="opt-label">optional</span></div>
+          <form id="add-prop" class="grid-form">
+            <input name="pid" placeholder="Name, e.g. owns" required maxlength="24" autocomplete="off" class="span2" />
+            <label>Domain<select name="domain"></select></label>
+            <label>Range<select name="range"></select></label>
+            <label>Inverse of<select name="inverseOf"></select></label>
+            <label class="toggle"><input type="checkbox" name="transitive" /><span></span>Transitive</label>
+            <button class="btn btn-sm span2"><i class="sw sw-prop"></i>Add property</button>
+          </form>
+        </div>
 
-        <h4>3. Connect</h4>
-        <form id="add-fact" class="stack">
-          <select name="s" required></select>
-          <select name="p" required></select>
-          <select name="o" required></select>
-          <button>+ Add fact</button>
-        </form>
+        <div class="pane-section">
+          <div class="pane-title"><span class="step">3</span>Assert a fact</div>
+          <form id="add-fact" class="stack">
+            <select name="s" required aria-label="Subject"></select>
+            <select name="p" required aria-label="Relation"></select>
+            <select name="o" required aria-label="Object"></select>
+            <button class="btn btn-sm">Add fact</button>
+          </form>
+        </div>
 
         <div id="selection" class="selection"></div>
 
-        <h4>Stated facts</h4>
-        <ul id="stated" class="facts"></ul>
-        <h4 id="props-heading">Properties</h4>
-        <ul id="props" class="facts"></ul>
+        <div class="pane-section">
+          <div class="pane-title">Stated facts</div>
+          <ul id="stated" class="facts"></ul>
+        </div>
+        <div class="pane-section">
+          <div class="pane-title">Properties</div>
+          <ul id="props" class="facts"></ul>
+        </div>
       </aside>
 
-      <div class="canvas-wrap">
-        <div class="canvas-bar">
-          <button id="reason-btn" class="reason">✨ Run reasoner</button>
-          <span id="reason-msg" class="muted">Inferred facts appear as dashed amber arrows.</span>
+      <div class="pane canvas-wrap">
+        <div class="toolbar">
+          <button id="reason-btn" class="btn btn-primary btn-sm"></button>
+          <span id="reason-msg" class="status"></span>
         </div>
         <svg id="sandbox-graph" class="graph"></svg>
-        <div class="legend">
-          <span class="lg lg-class">Class</span><span class="lg lg-ind">Individual</span>
+        <div class="legend mono">
+          <span class="lg lg-class">class</span><span class="lg lg-ind">individual</span>
           <span class="lg lg-line">stated</span><span class="lg lg-dash">inferred</span>
-          <span class="muted">Drag nodes · click to select</span>
+          <span class="hint">drag to move · click to select</span>
         </div>
       </div>
 
-      <aside class="panel side right">
-        <div class="subtabs">
-          <button class="subtab active" data-sub="inferred">New facts</button>
-          <button class="subtab" data-sub="problems">Problems <span id="problem-count"></span></button>
-          <button class="subtab" data-sub="turtle">Behind the scenes</button>
+      <aside class="pane side right">
+        <div class="segmented subtabs">
+          <button class="subtab active" data-sub="inferred">Inferred</button>
+          <button class="subtab" data-sub="problems">Issues <span id="problem-count"></span></button>
+          <button class="subtab" data-sub="turtle">OWL</button>
         </div>
-        <div class="sub active" id="sub-inferred"><p class="muted">Run the reasoner to see what it can work out.</p></div>
+        <div class="sub active" id="sub-inferred"></div>
         <div class="sub" id="sub-problems"></div>
-        <div class="sub" id="sub-turtle"><p class="muted">This is your world in OWL, the W3C standard, written in Turtle syntax.</p><pre id="turtle"></pre></div>
+        <div class="sub" id="sub-turtle">
+          <p class="muted small">Your world in OWL, the W3C ontology standard, serialized as Turtle.</p>
+          <pre id="turtle"></pre>
+        </div>
       </aside>
     </section>
 
     <!-- Detective -->
     <section id="view-detective" class="view">
+      <div class="det-head">
+        <div>
+          <span class="mono label">Ontology Detective</span>
+          <h2>Predict what the reasoner concludes.</h2>
+        </div>
+        <div class="progress"><div class="bar"><span id="progress-bar"></span></div><span id="progress-text" class="mono"></span></div>
+      </div>
       <div class="level-strip" id="level-strip"></div>
       <div class="case">
-        <div class="case-left">
+        <div class="pane case-left">
           <div class="case-head">
-            <span class="concept" id="lv-concept"></span>
-            <h2 id="lv-title"></h2>
+            <span class="mono label" id="lv-concept"></span>
+            <h3 id="lv-title"></h3>
             <p id="lv-story"></p>
           </div>
           <svg id="detective-graph" class="graph"></svg>
-          <ul id="lv-facts" class="facts given"></ul>
+          <div class="given">
+            <div class="pane-title">Known facts &amp; rules</div>
+            <ul id="lv-facts" class="facts"></ul>
+          </div>
         </div>
-        <div class="case-right panel">
+        <div class="pane case-right">
+          <div class="pane-title">Question</div>
           <h3 id="lv-question"></h3>
           <div id="lv-options" class="options"></div>
           <div id="lv-feedback"></div>

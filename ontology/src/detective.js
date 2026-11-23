@@ -44,10 +44,13 @@ function renderGraph() {
   graph.render(model);
 }
 
+const CHECK = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const KEYS = "ABCD";
+
 function renderFeedback() {
   const fb = $("#lv-feedback");
   if (lv.answered === null) {
-    fb.innerHTML = lv.wrong.size ? `<p class="bad-msg">Not quite. Look at the rules on the left and try again.</p>` : "";
+    fb.innerHTML = lv.wrong.size ? `<div class="banner bad">Not quite. Re-read the known rules and try again.</div>` : "";
     return;
   }
   const shown = lv.steps.slice(0, lv.revealed);
@@ -55,19 +58,23 @@ function renderFeedback() {
   const last = lv.index === levels.length - 1;
   const allSolved = levels.every((_, i) => i in progress.solved);
   fb.innerHTML = `
-    <p class="good-msg">✔ Correct! +${progress.solved[lv.index]} ★</p>
-    <h4>How the reasoner gets there</h4>
-    <ol class="why steps">${shown
-      .map((s) =>
-        s.contradiction
-          ? `<li class="contra">⚠ ${esc(s.contradiction.because)}</li>`
-          : `<li class="${s.inferred ? "inf" : ""}">${s.inferred ? `<span class="rule">${s.rule}</span>${esc(s.because)}` : `${esc(describe(s))} <span class="muted">(given)</span>`}</li>`,
-      )
-      .join("")}</ol>
-    ${done ? "" : `<button id="next-step" class="reason">${lv.revealed ? "Next step →" : "▶ Show the reasoning"}</button>`}
-    ${done ? `<div class="takeaway"><b>Takeaway:</b> ${esc(lv.level.takeaway)}</div>` : ""}
-    ${done && !last ? `<button id="next-level" class="primary">Next case →</button>` : ""}
-    ${done && last && allSolved ? `<div class="badge">🕵️ All cases closed! You scored ${score()} / ${levels.length * 3} ★. Now try building your own world.</div>` : ""}
+    <div class="banner good">${CHECK} Correct<span class="pts">+${progress.solved[lv.index]} pts</span></div>
+    <div class="reasoning">
+      <div class="pane-title">Reasoner trace</div>
+      ${shown.length ? `<ol class="why">${shown
+        .map((s) =>
+          s.contradiction
+            ? `<li class="contra">${esc(s.contradiction.because)}</li>`
+            : `<li class="${s.inferred ? "inf" : ""}">${s.inferred ? `<span class="rule">${s.rule}</span>${esc(s.because)}` : `${esc(describe(s))} <span class="muted">· given</span>`}</li>`,
+        )
+        .join("")}</ol>` : `<p class="muted small">Step through the derivation and watch each inferred edge appear on the graph.</p>`}
+    </div>
+    ${done ? `<div class="takeaway"><span class="mono label">Takeaway</span>${esc(lv.level.takeaway)}</div>` : ""}
+    <div class="actions">
+      ${done ? "" : `<button id="next-step" class="btn ${lv.revealed ? "" : "btn-primary"} btn-sm">${lv.revealed ? `Next step <span class="muted mono">${lv.revealed}/${lv.steps.length}</span>` : "Trace the reasoning"}</button>`}
+      ${done && !last ? `<button id="next-level" class="btn btn-primary btn-sm">Next case →</button>` : ""}
+    </div>
+    ${done && last && allSolved ? `<div class="finale"><b>All cases closed.</b>You scored ${score()} of ${levels.length * 3} points. Now model your own domain in Build a World.</div>` : ""}
   `;
   $("#next-step")?.addEventListener("click", () => {
     lv.revealed++;
@@ -81,12 +88,19 @@ function renderStrip() {
   $("#level-strip").innerHTML = levels
     .map((l, i) => {
       const pts = progress.solved[i];
-      return `<button class="lvl ${i === lv.index ? "active" : ""} ${i in progress.solved ? "solved" : ""}" data-level="${i}">
-        <span class="n">${i in progress.solved ? "✓" : i + 1}</span><span>${esc(l.concept)}</span>${pts ? `<span class="stars">${"★".repeat(pts)}</span>` : ""}
+      const status = i in progress.solved
+        ? `<span class="pips">${[1, 2, 3].map((n) => `<i class="${n <= pts ? "on" : ""}"></i>`).join("")}</span>`
+        : "";
+      return `<button class="lvl ${i === lv.index ? "active" : ""}" data-level="${i}">
+        <span class="row"><span class="${i in progress.solved ? "check" : ""}">${i in progress.solved ? CHECK : ""}CASE 0${i + 1}</span>${status}</span>
+        <span class="name">${esc(l.concept)}</span>
       </button>`;
     })
     .join("");
-  $("#score").textContent = `★ ${score()}`;
+  const solved = Object.keys(progress.solved).length;
+  $("#score").textContent = `${score()} pts`;
+  $("#progress-bar").style.width = `${(solved / levels.length) * 100}%`;
+  $("#progress-text").textContent = `${solved}/${levels.length} solved`;
 }
 
 function open(index) {
@@ -102,7 +116,7 @@ function open(index) {
   };
   lv.steps = steps();
 
-  $("#lv-concept").textContent = `Case ${index + 1} · ${level.concept}`;
+  $("#lv-concept").textContent = `Case 0${index + 1} · ${level.concept}`;
   $("#lv-title").textContent = level.title;
   $("#lv-story").textContent = level.story;
   $("#lv-question").textContent = level.question;
@@ -110,7 +124,7 @@ function open(index) {
     ...level.world.properties.flatMap(propertyRules),
     ...level.world.facts.map(describe),
   ];
-  $("#lv-facts").innerHTML = `<li class="head">What we know</li>` + given.map((g) => `<li>${esc(g)}</li>`).join("");
+  $("#lv-facts").innerHTML = given.map((g) => `<li>${esc(g)}</li>`).join("");
   renderOptions();
   renderStrip();
   renderGraph();
@@ -121,7 +135,7 @@ function renderOptions() {
   $("#lv-options").innerHTML = lv.level.options
     .map((o, i) => {
       const cls = lv.answered === i ? "right" : lv.wrong.has(i) ? "wrong" : "";
-      return `<button class="opt ${cls}" data-opt="${i}" ${lv.answered !== null ? "disabled" : ""}>${esc(o)}</button>`;
+      return `<button class="opt ${cls}" data-opt="${i}" ${lv.answered !== null ? "disabled" : ""}><kbd>${KEYS[i]}</kbd>${esc(o)}</button>`;
     })
     .join("");
 }
@@ -138,8 +152,17 @@ export function initDetective() {
 
   $("#lv-options").addEventListener("click", (e) => {
     const b = e.target.closest("[data-opt]");
-    if (!b || lv.answered !== null) return;
-    const i = +b.dataset.opt;
+    if (b) answer(+b.dataset.opt);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!$("#view-detective").classList.contains("active") || e.metaKey || e.ctrlKey || e.altKey) return;
+    const i = KEYS.indexOf(e.key.toUpperCase());
+    if (i >= 0 && i < lv.level.options.length) answer(i);
+    else if (e.key === "Enter" && !e.target.closest("input, select, #lv-options, #lv-feedback, #level-strip")) ($("#next-step") ?? $("#next-level"))?.click();
+  });
+
+  function answer(i) {
+    if (lv.answered !== null || lv.wrong.has(i)) return;
     if (i === lv.level.answer) {
       lv.answered = i;
       if (!(lv.index in progress.solved)) progress.solved[lv.index] = Math.max(1, 3 - lv.wrong.size);
@@ -150,7 +173,7 @@ export function initDetective() {
     renderOptions();
     renderStrip();
     renderFeedback();
-  });
+  }
 
   const firstUnsolved = levels.findIndex((_, i) => !(i in progress.solved));
   open(firstUnsolved === -1 ? 0 : firstUnsolved);

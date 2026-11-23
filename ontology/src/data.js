@@ -151,7 +151,7 @@ export const levels = [
         { s: "Ava", p: "holdsPassport", o: "P-42" },
       ],
     },
-    positions: { Human: [180, 90], Robot: [520, 90], Android: [520, 250], Ava: [350, 410], "P-42": [110, 410] },
+    positions: { Human: [180, 90], Robot: [520, 90], Android: [650, 250], Ava: [350, 410], "P-42": [110, 410] },
     question: "What does the reasoner report?",
     options: [
       "Everything is consistent",

@@ -7,6 +7,9 @@ const STORE = "ontology-sandbox";
 const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const clone = (x) => JSON.parse(JSON.stringify(x));
+const X_ICON = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const ALERT_ICON = `<svg viewBox="0 0 16 16" width="15" height="15"><path d="M8 1.5l7 12.5H1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6v3.5M8 11.5v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const PLAY_ICON = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>`;
 
 let state;
 let result;
@@ -83,18 +86,18 @@ function refreshForms() {
 function renderLists() {
   const { world } = state;
   $("#stated").innerHTML =
-    world.facts.map((f, i) => `<li><span>${esc(describe(f))}</span><button class="x" data-del-fact="${i}" title="Remove">×</button></li>`).join("") ||
-    `<li class="muted">No facts yet.</li>`;
+    world.facts.map((f, i) => `<li><span>${esc(describe(f))}</span><button class="x" data-del-fact="${i}" title="Remove">${X_ICON}</button></li>`).join("") ||
+    `<li class="empty">No facts yet.</li>`;
   $("#props").innerHTML =
     world.properties
       .map((p, i) => {
         const bits = [p.domain && `from ${p.domain}`, p.range && `to ${p.range}`, p.transitive && "transitive", p.inverseOf && `inverse of ${p.inverseOf}`].filter(Boolean);
-        return `<li><span><b>${esc(p.id)}</b> <span class="muted">${esc(bits.join(", ") || "no rules")}</span></span><button class="x" data-del-prop="${i}" title="Remove">×</button></li>`;
+        return `<li><span><b>${esc(p.id)}</b> <span class="muted">${esc(bits.join(", ") || "no rules")}</span></span><button class="x" data-del-prop="${i}" title="Remove">${X_ICON}</button></li>`;
       })
-      .join("") || `<li class="muted">None yet.</li>`;
+      .join("") || `<li class="empty">None yet.</li>`;
 
   $("#selection").innerHTML = state.selected
-    ? `<span>Selected <b>${esc(state.selected)}</b> (${isClass(state.selected) ? "class" : "individual"})</span><button class="danger" id="del-node">Delete</button>`
+    ? `<span>Selected <b>${esc(state.selected)}</b> (${isClass(state.selected) ? "class" : "individual"})</span><button class="btn btn-sm btn-danger" id="del-node">Delete</button>`
     : "";
   $("#del-node")?.addEventListener("click", () => deleteNode(state.selected));
 }
@@ -103,12 +106,12 @@ function renderInsights() {
   const inferred = [...result.facts.entries()].filter(([, f]) => f.inferred);
   const box = $("#sub-inferred");
   if (!state.showInferred) {
-    box.innerHTML = `<p class="muted">Run the reasoner to see what it can work out from your rules.</p>`;
+    box.innerHTML = `<div class="empty-state"><b>Reasoner idle</b>Run the reasoner to see what it can derive from your rules.</div>`;
   } else if (!inferred.length) {
-    box.innerHTML = `<p class="muted">Nothing new to infer yet. Try a subclass chain, or a property with a domain.</p>`;
+    box.innerHTML = `<div class="empty-state"><b>Nothing to infer yet</b>Try a subclass chain, or a property with a domain.</div>`;
   } else {
     box.innerHTML =
-      `<p class="muted">Click a fact to see how the reasoner got there.</p><ul class="facts inferred">` +
+      `<p>Select a fact to trace how the reasoner derived it.</p><ul class="facts inferred">` +
       inferred
         .map(([k, f]) => {
           const open = state.highlight?.key === k;
@@ -123,16 +126,16 @@ function renderInsights() {
   const probs = result.contradictions;
   $("#problem-count").textContent = probs.length ? probs.length : "";
   $("#sub-problems").innerHTML = probs.length
-    ? probs.map((c) => `<div class="problem">⚠ ${esc(c.because)}</div>`).join("")
-    : `<p class="muted">No contradictions. Mark two classes as <i>disjoint</i> and then put one individual in both to see one.</p>`;
+    ? probs.map((c) => `<div class="problem">${ALERT_ICON}<span>${esc(c.because)}</span></div>`).join("")
+    : `<div class="empty-state"><b>No issues</b>Mark two classes as disjoint, then put one individual in both.</div>`;
   $("#turtle").textContent = toTurtle(state.world);
 
   const msg = $("#reason-msg");
-  $("#reason-btn").textContent = state.showInferred ? "Hide inferences" : "✨ Run reasoner";
+  $("#reason-btn").innerHTML = state.showInferred ? "Hide inferences" : `${PLAY_ICON}Run reasoner`;
   msg.textContent = state.showInferred
     ? `The reasoner found ${inferred.length} new fact${inferred.length === 1 ? "" : "s"}${probs.length ? ` and ${probs.length} contradiction${probs.length === 1 ? "" : "s"}` : ""}.`
-    : "Inferred facts appear as dashed amber arrows.";
-  msg.className = state.showInferred ? (probs.length ? "bad-msg" : "good-msg") : "muted";
+    : "Inferred facts appear as dashed amber edges.";
+  msg.className = "status" + (state.showInferred ? (probs.length ? " err" : " ok") : "");
 }
 
 function update() {
@@ -170,10 +173,14 @@ export function initSandbox() {
     const saved = JSON.parse(localStorage.getItem(STORE));
     if (saved?.world) state = { ...saved, showInferred: false, selected: null, highlight: null };
   } catch {}
-  if (!state) load("pets");
+  if (!state) {
+    load("pets");
+    $('[data-preset="pets"]').classList.add("active");
+  }
 
   document.querySelectorAll("[data-preset]").forEach((b) =>
     b.addEventListener("click", () => {
+      document.querySelectorAll("[data-preset]").forEach((x) => x.classList.toggle("active", x === b));
       load(b.dataset.preset);
       update();
     }),

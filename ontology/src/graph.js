@@ -75,15 +75,17 @@ export function createGraph(svg, { onMove, onSelect } = {}) {
       const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
       // Spread parallel edges into alternating curves.
       // Inferred edges always curve, so they don't hide the stated ones.
-      const bend = (i === 0 ? 0 : Math.ceil(i / 2) * 46 * (i % 2 ? 1 : -1) * (e.s < e.o ? 1 : -1)) + (e.inferred ? 60 + len * 0.15 : 0);
+      const bend = (i === 0 ? 0 : Math.ceil(i / 2) * 46 * (i % 2 ? 1 : -1) * (e.s < e.o ? 1 : -1)) + (e.inferred ? 60 + len * 0.22 : 0);
       const mx = (a.x + b.x) / 2;
       const my = (a.y + b.y) / 2;
       const cx = mx - ((b.y - a.y) / len) * bend;
       const cy = my + ((b.x - a.x) / len) * bend;
       const [x1, y1] = edgePoint(a, cx, cy);
       const [x2, y2] = edgePoint(b, cx, cy);
-      const lx = (x1 + 2 * cx + x2) / 4;
-      const ly = (y1 + 2 * cy + y2) / 4;
+      // Inferred labels sit off-centre: an inferred shortcut usually skips a node at its midpoint.
+      const t = e.inferred ? 0.32 : 0.5;
+      const lx = (1 - t) ** 2 * x1 + 2 * t * (1 - t) * cx + t ** 2 * x2;
+      const ly = (1 - t) ** 2 * y1 + 2 * t * (1 - t) * cy + t ** 2 * y2;
       const cls = [
         "edge",
         `edge-${["type", "subClassOf", "disjointWith"].includes(e.p) ? e.p : "prop"}`,
