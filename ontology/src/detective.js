@@ -108,6 +108,8 @@ function renderStrip() {
       </button>`;
     })
     .join("");
+  const strip = $("#level-strip");
+  strip.scrollTo({ left: strip.querySelector(".active").offsetLeft - 14 }); // phones scroll the strip sideways
   const solved = solvedCount();
   $("#progress-bar").style.width = `${(solved / levels.length) * 100}%`;
   $("#progress-text").textContent = `${solved}/${levels.length} solved`;

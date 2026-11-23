@@ -3,17 +3,19 @@ import { relationLabel } from "./ontology.js";
 
 const W = 800;
 const H = 500;
-const NODE_H = 38;
+// Phones shrink the whole graph, so nodes and labels are drawn larger there.
+const scale = () => (matchMedia("(max-width: 760px)").matches ? 1.35 : 1);
+const nodeH = () => 38 * scale();
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-const width = (n) => Math.max(70, 26 + n.id.length * 8.6);
+const width = (n) => Math.max(70, 26 + n.id.length * 8.6) * scale();
 
 // Point where the line from the node centre towards (tx, ty) leaves its box.
 function edgePoint(n, tx, ty) {
   const dx = tx - n.x;
   const dy = ty - n.y;
   const hw = width(n) / 2 + 4;
-  const hh = NODE_H / 2 + 4;
+  const hh = nodeH() / 2 + 4;
   const t = Math.min(hw / Math.abs(dx || 1e-9), hh / Math.abs(dy || 1e-9));
   return [n.x + dx * t, n.y + dy * t];
 }
@@ -104,8 +106,8 @@ export function createGraph(svg, { onMove, onSelect } = {}) {
       const w = width(n);
       const cls = ["node", `node-${n.kind}`, model.selected === n.id ? "selected" : "", model.bad?.has(n.id) ? "bad" : ""].join(" ");
       parts.push(`<g class="${cls}" data-node="${esc(n.id)}" transform="translate(${n.x},${n.y})">
-        <rect x="${-w / 2}" y="${-NODE_H / 2}" width="${w}" height="${NODE_H}" rx="${n.kind === "class" ? 8 : NODE_H / 2}"/>
-        <text dy="5">${esc(n.id)}</text>
+        <rect x="${-w / 2}" y="${-nodeH() / 2}" width="${w}" height="${nodeH()}" rx="${n.kind === "class" ? 8 : nodeH() / 2}"/>
+        <text dy="${5 * scale()}">${esc(n.id)}</text>
       </g>`);
     }
     svg.innerHTML = parts.join("");

@@ -10,7 +10,7 @@ function shareText() {
 }
 
 function renderHeader() {
-  $("#profile-btn").innerHTML = `<span class="mono">${score()} pts</span><span class="sep"></span><span class="mono">${progress.badges.length}/${BADGES.length}</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="5"/><path d="M8.5 13 7 21l5-3 5 3-1.5-8"/></svg>`;
+  $("#profile-btn").innerHTML = `<span class="mono">${score()} pts</span><span class="sep"></span><span class="mono badge-count">${progress.badges.length}/${BADGES.length}</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="5"/><path d="M8.5 13 7 21l5-3 5 3-1.5-8"/></svg>`;
 }
 
 function renderPanel() {
