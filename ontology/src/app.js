@@ -15,6 +15,12 @@ function show(tab) {
 document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => show(b.dataset.tab)));
 document.querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", () => show(b.dataset.goto)));
 
+document.querySelector("#theme-btn").addEventListener("click", () => {
+  const theme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem("theme", theme);
+});
+
 // Hero demo: the first Detective case with its inferences drawn.
 const demo = levels[0].world;
 const demoPositions = { Animal: [470, 55], Mammal: [370, 200], Dog: [470, 345], Rex: [190, 345] };
