@@ -1,7 +1,8 @@
 // "Build a World": a free-form ontology editor with a live reasoner.
 import { reason, explain, describe, relationLabel, toTurtle } from "./ontology.js";
 import { createGraph, graphModel } from "./graph.js";
-import { presets } from "./data.js";
+import { presets, missions } from "./data.js";
+import { progress, save as saveProgress, award, toast, MISSION_POINTS } from "./progress.js";
 
 const STORE = "ontology-sandbox";
 const $ = (sel) => document.querySelector(sel);
@@ -138,8 +139,47 @@ function renderInsights() {
   msg.className = "status" + (state.showInferred ? (probs.length ? " err" : " ok") : "");
 }
 
+function checkMissions() {
+  let changed = false;
+  for (const m of missions) {
+    if (progress.missions.includes(m.id) || !m.done(state.world, result, state.showInferred)) continue;
+    progress.missions.push(m.id);
+    changed = true;
+    toast("Mission complete", `${m.title} · +${MISSION_POINTS} pts`, { kind: "mission" });
+  }
+  if (changed) saveProgress();
+  if (progress.missions.length === missions.length) award("architect");
+  if (state.showInferred && result.contradictions.length) award("hunter");
+}
+
+function renderMissions() {
+  const done = progress.missions.length;
+  const current = missions.find((m) => !progress.missions.includes(m.id));
+  const blank = !state.world.classes.length && !state.world.individuals.length;
+  $("#sub-missions").innerHTML = `
+    <div class="mission-head">
+      <div><b>${done === missions.length ? "All missions complete" : "Your first ontology in 6 steps"}</b><span class="muted small">${done}/${missions.length} complete · ${MISSION_POINTS} pts each</span></div>
+      <div class="bar"><span style="width:${(done / missions.length) * 100}%"></span></div>
+    </div>
+    ${current && !blank && done === 0 ? `<button class="btn btn-sm wide" data-preset-go="empty">Start on a blank canvas</button>` : ""}
+    <ol class="missions">${missions
+      .map((m, i) => {
+        const isDone = progress.missions.includes(m.id);
+        const isCurrent = m === current;
+        return `<li class="${isDone ? "done" : isCurrent ? "current" : "todo"}">
+          <span class="m-num">${isDone ? `<svg viewBox="0 0 16 16" width="11" height="11"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : i + 1}</span>
+          <div><div class="m-title">${m.title}</div>
+          ${isCurrent ? `<div class="m-task">${esc(m.task)}</div>` : ""}
+          ${isDone ? `<div class="m-why">${esc(m.why)}</div>` : ""}</div>
+        </li>`;
+      })
+      .join("")}</ol>
+    ${done === missions.length ? `<p class="muted small">You've built and broken an ontology. Ready to test yourself? Try the Detective tab.</p>` : ""}`;
+}
+
 function update() {
   result = reason(state.world);
+  checkMissions();
   if (state.highlight && !result.facts.has(state.highlight.key)) state.highlight = null;
   const model = graphModel(state.world, state.positions, result, {
     showInferred: state.showInferred,
@@ -152,6 +192,7 @@ function update() {
   refreshForms();
   renderLists();
   renderInsights();
+  renderMissions();
   save();
 }
 
@@ -233,6 +274,8 @@ export function initSandbox() {
   });
 
   document.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-preset-go]");
+    if (go) return $(`[data-preset="${go.dataset.presetGo}"]`).click();
     const t = e.target.closest("[data-del-fact],[data-del-prop],[data-explain]");
     if (!t) return;
     if (t.dataset.delFact) state.world.facts.splice(+t.dataset.delFact, 1);
@@ -247,6 +290,7 @@ export function initSandbox() {
 
   $("#reason-btn").addEventListener("click", () => {
     state.showInferred = !state.showInferred;
+    if (state.showInferred) award("spark");
     state.highlight = null;
     fresh = state.showInferred;
     update();
@@ -257,6 +301,7 @@ export function initSandbox() {
       document.querySelectorAll(".subtab, .sub").forEach((x) => x.classList.remove("active"));
       b.classList.add("active");
       $(`#sub-${b.dataset.sub}`).classList.add("active");
+      if (b.dataset.sub === "turtle") award("explorer");
     }),
   );
 

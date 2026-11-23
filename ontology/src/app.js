@@ -1,5 +1,6 @@
 import { initSandbox } from "./sandbox.js";
 import { initDetective } from "./detective.js";
+import { initProfile } from "./profile.js";
 import { createGraph, graphModel } from "./graph.js";
 import { reason } from "./ontology.js";
 import { levels } from "./data.js";
@@ -26,6 +27,7 @@ document.querySelector("#hero-count").textContent = `${heroModel.edges.filter((e
 heroModel.edges.forEach((e) => (e.fresh = e.inferred));
 hero.render(heroModel);
 
+initProfile();
 initSandbox();
 initDetective();
 show(["learn", "sandbox", "detective"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "learn");

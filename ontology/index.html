@@ -23,7 +23,7 @@
       <button class="tab" data-tab="detective">Detective</button>
     </nav>
     <div class="top-right">
-      <span class="score" id="score" title="Detective score">0 pts</span>
+      <button class="profile-btn" id="profile-btn" title="Your score and badges"></button>
       <a class="icon-link" href="https://github.com/mani-bellan/concept-playgrounds" target="_blank" rel="noopener" aria-label="Source on GitHub">
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
@@ -57,6 +57,19 @@
         </figure>
       </div>
 
+      <div class="beginner">
+        <div class="plain">
+          <span class="mono label">New to this? The 30-second version</span>
+          <p>Imagine briefing a very literal new colleague: <em>"There are animals. Dogs are a kind of animal. Rex is a dog."</em> Now ask them <em>"Is Rex an animal?"</em> They can work it out, even though you never said it directly.</p>
+          <p>An <b>ontology</b> is that briefing, written so a computer can read it. A <b>reasoner</b> is the colleague who works out the answers. No maths or code needed here: you'll build one by clicking.</p>
+        </div>
+        <ol class="path">
+          <li><span class="mono">01</span><div><b>Learn the 4 ideas</b><span>Read the cards below · 2 min</span></div></li>
+          <li data-goto="sandbox"><span class="mono">02</span><div><b>Do the guided missions</b><span>Build your first ontology · 5 min</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
+          <li data-goto="detective"><span class="mono">03</span><div><b>Test yourself</b><span>Six detective cases · 5 min</span></div><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></li>
+        </ol>
+      </div>
+
       <div class="section-head">
         <span class="mono label">The building blocks</span>
         <h2>Four ideas. That's the whole model.</h2>
@@ -88,6 +101,21 @@
         </article>
       </div>
 
+      <div class="section-head decoder-head">
+        <span class="mono label">Jargon decoder</span>
+        <h2>The words you'll see, in plain English.</h2>
+      </div>
+      <dl class="decoder">
+        <div><dt>Reasoner</dt><dd>The program that reads your rules and works out new facts.</dd></div>
+        <div><dt>Subclass</dt><dd>A narrower kind. Every Dog is an Animal, so Dog is a subclass of Animal.</dd></div>
+        <div><dt>Domain</dt><dd>What kind of thing can sit at the start of a relationship. Only a Person can "own".</dd></div>
+        <div><dt>Range</dt><dd>What kind of thing sits at the end of a relationship. You can only "own" a Thing.</dd></div>
+        <div><dt>Transitive</dt><dd>A relationship that chains: inside a box inside a room means inside the room.</dd></div>
+        <div><dt>Inverse</dt><dd>The same link read backwards: "parent of" and "child of".</dd></div>
+        <div><dt>Disjoint</dt><dd>Two classes with no members in common. Nothing is both a Cat and a Dog.</dd></div>
+        <div><dt>OWL &amp; Turtle</dt><dd>OWL is the W3C standard for ontologies. Turtle is a readable text format for writing it.</dd></div>
+      </dl>
+
       <div class="where">
         <span class="mono label">Where you'll meet them</span>
         <div class="logos">
@@ -109,7 +137,7 @@
         </div>
 
         <div class="pane-section">
-          <div class="pane-title"><span class="step">1</span>Add an entity</div>
+          <div class="pane-title"><span class="step">1</span>Add a <span class="term" tabindex="0" data-tip="A kind of thing, like Dog or Food.">class</span> or <span class="term" tabindex="0" data-tip="An actual thing, like Rex or Mango.">individual</span></div>
           <form id="add-node">
             <input name="label" placeholder="Name, e.g. Dog or Rex" required maxlength="24" autocomplete="off" />
             <div class="btn-row">
@@ -123,10 +151,10 @@
           <div class="pane-title"><span class="step">2</span>Define a property <span class="opt-label">optional</span></div>
           <form id="add-prop" class="grid-form">
             <input name="pid" placeholder="Name, e.g. owns" required maxlength="24" autocomplete="off" class="span2" />
-            <label>Domain<select name="domain"></select></label>
-            <label>Range<select name="range"></select></label>
-            <label>Inverse of<select name="inverseOf"></select></label>
-            <label class="toggle"><input type="checkbox" name="transitive" /><span></span>Transitive</label>
+            <label><span class="term" tabindex="0" data-tip="What can sit at the start: only this class can use the property.">Domain</span><select name="domain"></select></label>
+            <label><span class="term" tabindex="0" data-tip="What sits at the end: whatever the property points to is this class.">Range</span><select name="range"></select></label>
+            <label><span class="term" tabindex="0" data-tip="The same link read backwards, like parent of / child of.">Inverse of</span><select name="inverseOf"></select></label>
+            <label class="toggle"><input type="checkbox" name="transitive" /><span></span><span class="term" tabindex="0" data-tip="Chains through steps: A→B and B→C gives A→C.">Transitive</span></label>
             <button class="btn btn-sm span2"><i class="sw sw-prop"></i>Add property</button>
           </form>
         </div>
@@ -162,17 +190,19 @@
         <div class="legend mono">
           <span class="lg lg-class">class</span><span class="lg lg-ind">individual</span>
           <span class="lg lg-line">stated</span><span class="lg lg-dash">inferred</span>
-          <span class="hint">drag to move · click to select</span>
+          <span class="legend-hint">drag to move · click to select</span>
         </div>
       </div>
 
       <aside class="pane side right">
         <div class="segmented subtabs">
-          <button class="subtab active" data-sub="inferred">Inferred</button>
+          <button class="subtab active" data-sub="missions">Missions</button>
+          <button class="subtab" data-sub="inferred">Inferred</button>
           <button class="subtab" data-sub="problems">Issues <span id="problem-count"></span></button>
           <button class="subtab" data-sub="turtle">OWL</button>
         </div>
-        <div class="sub active" id="sub-inferred"></div>
+        <div class="sub active" id="sub-missions"></div>
+        <div class="sub" id="sub-inferred"></div>
         <div class="sub" id="sub-problems"></div>
         <div class="sub" id="sub-turtle">
           <p class="muted small">Your world in OWL, the W3C ontology standard, serialized as Turtle.</p>
@@ -205,6 +235,7 @@
           </div>
         </div>
         <div class="pane case-right">
+          <div class="primer"><span class="mono label">New idea</span><p id="lv-primer"></p></div>
           <div class="pane-title">Question</div>
           <h3 id="lv-question"></h3>
           <div id="lv-options" class="options"></div>
@@ -213,6 +244,14 @@
       </div>
     </section>
   </main>
+
+  <dialog id="profile">
+    <div class="dialog-head">
+      <div><span class="mono label">Your progress</span><h3>Ontology Playground</h3></div>
+      <button class="x-btn" data-close aria-label="Close"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div id="profile-body"></div>
+  </dialog>
 
   <script type="module" src="src/app.js"></script>
 </body>
