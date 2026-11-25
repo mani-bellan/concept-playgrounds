@@ -639,3 +639,18 @@ pre.sql code { background: none; border: 0; padding: 0; font-size: inherit; colo
 .lvl .pack-tag { font-style: normal; margin-left: 6px; padding: 1px 5px; border-radius: 4px; font-size: 9.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ind); background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .25); }
 pre.sql .c { color: var(--muted); }
 pre.sql .catch { color: var(--inf); }
+
+/* Ways to fix a contradiction */
+.fix-box { margin: 14px 0 4px; }
+.problem + .fix-box { margin: -2px 0 14px; }
+.fixes { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.fix { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); text-align: left; font-size: 12.5px; line-height: 1.45; transition: border-color .15s, background .15s; }
+.fix:hover { border-color: var(--line-2); background: var(--panel-2); color: var(--ink); }
+.fix.active { border-color: rgba(52, 211, 153, .5); background: rgba(52, 211, 153, .06); color: var(--ink); }
+.fix .layer { font-family: var(--mono); font-size: 9.5px; letter-spacing: .05em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; }
+.layer-data { color: var(--ind); background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .25); }
+.layer-rule { color: var(--class); background: rgba(124, 156, 255, .1); border: 1px solid rgba(124, 156, 255, .25); }
+.fix-result { margin-top: 10px; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
+.fix-result > span { flex: 1; min-width: 0; }
+.fix-result .btn { margin-left: auto; }
+.reasoner-note { font-size: 11.5px; line-height: 1.55; color: var(--muted); margin: 12px 0 0; padding-left: 10px; border-left: 2px solid var(--line-2); }

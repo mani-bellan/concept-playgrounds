@@ -125,6 +125,56 @@ export function explain(result, keys) {
   return steps;
 }
 
+// Ways to resolve a contradiction: each removes one stated fact or one
+// property rule behind it, and is kept only if the reasoner then no longer
+// finds that contradiction. "data" fixes change facts about individuals;
+// "rule" fixes change the ontology itself.
+export function fixes(world, c) {
+  const result = reason(world);
+  const options = new Map();
+  const withProps = (ids, edit) => ({
+    ...world,
+    properties: world.properties.map((p) => {
+      if (!ids.includes(p.id)) return p;
+      const q = { ...p };
+      edit(q);
+      return q;
+    }),
+  });
+  for (const s of explain(result, c.from)) {
+    if (!s.inferred) {
+      const layer = s.p === "subClassOf" || s.p === "disjointWith" ? "rule" : "data";
+      options.set(key(s), { layer, label: describe(s), world: { ...world, facts: world.facts.filter((f) => key(f) !== key(s)) } });
+      continue;
+    }
+    const via = result.facts.get(s.from[0]);
+    if (s.rule === "Domain" || s.rule === "Range") {
+      const p = world.properties.find((p) => p.id === via.p);
+      const attr = s.rule.toLowerCase();
+      const label = attr === "domain" ? `Anything that ${p.id} something is ${an(p[attr])}` : `Anything at the receiving end of "${p.id}" is ${an(p[attr])}`;
+      options.set(`${p.id}#${attr}`, { layer: "rule", label, world: withProps([p.id], (q) => delete q[attr]) });
+    } else if (s.rule === "Transitivity") {
+      options.set(`${s.p}#transitive`, { layer: "rule", label: `"${s.p}" is transitive`, world: withProps([s.p], (q) => delete q.transitive) });
+    } else if (s.rule === "Inverse") {
+      options.set(`${s.p}#inverse`, { layer: "rule", label: `"${s.p}" is the inverse of "${via.p}"`, world: withProps([s.p, via.p], (q) => delete q.inverseOf) });
+    }
+  }
+  const same = (x) => x.individual === c.individual && x.classes.join() === c.classes.join();
+  return [...options.values()]
+    .filter((o) => !reason(o.world).contradictions.some(same))
+    .sort((x, y) => (x.layer === y.layer ? 0 : x.layer === "data" ? -1 : 1));
+}
+
+// What a fix changes for the individual at the centre of the contradiction.
+export function fixOutcome(c, fixedWorld) {
+  const r = reason(fixedWorld);
+  const [a, b] = c.classes.map((cls) => r.facts.has(key({ s: c.individual, p: "type", o: cls })));
+  const [x, y] = c.classes;
+  if (a && b) return `${c.individual} can now be both ${an(x)} and ${an(y)}.`;
+  if (a || b) return `${c.individual} is still ${an(a ? x : y)}, but no longer ${an(a ? y : x)}.`;
+  return `${c.individual} is now neither ${an(x)} nor ${an(y)}.`;
+}
+
 const iri = (name) => "ex:" + name.replace(/[^A-Za-z0-9_]/g, "_");
 
 export function toTurtle(world) {

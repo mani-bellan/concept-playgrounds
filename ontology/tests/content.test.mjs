@@ -91,3 +91,18 @@ test("the generated SQL returns what the reasoner concludes", async () => {
   }
   assert.ok(checked > 40, `checked ${checked} queries`);
 });
+
+test("every suggested fix resolves its contradiction, and only real causes are offered", async () => {
+  const { fixes } = await import("../src/ontology.js");
+  for (const [i, level] of levels.entries()) {
+    if (!level.contradiction) continue;
+    const c = reason(level.world).contradictions[0];
+    const list = fixes(level.world, c);
+    assert.ok(list.some((f) => f.layer === "data") && list.some((f) => f.layer === "rule"), `case ${i + 1}: data and rule fixes`);
+    for (const f of list) assert.equal(reason(f.world).contradictions.length, 0, `case ${i + 1}: "${f.label}" should fix it`);
+  }
+  // The Android case has five independent causes; the subclass facts in Two Revenues are not causes.
+  const labels = (i) => fixes(levels[i].world, reason(levels[i].world).contradictions[0]).map((f) => f.label);
+  assert.equal(labels(4).length, 5);
+  assert.deepEqual(labels(10).sort(), ["Nothing can be both a GrossRevenue and a NetRevenue", "revenue_q3 is a GrossRevenue", "revenue_q3 is a NetRevenue"]);
+});

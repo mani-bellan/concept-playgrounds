@@ -1,5 +1,6 @@
 // "Build a World": a free-form ontology editor with a live reasoner.
-import { reason, explain, describe, relationLabel, toTurtle } from "./ontology.js";
+import { reason, explain, describe, relationLabel, toTurtle, fixes, fixOutcome } from "./ontology.js";
+import { fixList, REASONER_NOTE } from "./detective.js";
 import { createGraph, graphModel } from "./graph.js";
 import { presets, missions } from "./data.js";
 import { sqlFor, sqlForContradiction, sqlToggle, sqlNote, sqlBlock } from "./sql.js";
@@ -126,9 +127,18 @@ function renderInsights() {
   }
 
   const probs = result.contradictions;
+  state.fixes = [];
   $("#problem-count").textContent = probs.length ? probs.length : "";
   $("#sub-problems").innerHTML = probs.length
-    ? `<div class="inferred-head"><span></span>${sqlToggle()}</div>` + probs.map((c) => `<div class="problem">${ALERT_ICON}<span>${esc(c.because)}${sqlBlock(sqlForContradiction(c, result), esc)}</span></div>`).join("")
+    ? `<div class="inferred-head"><span></span>${sqlToggle()}</div>` +
+      probs
+        .map((c, ci) => {
+          state.fixes[ci] = fixes(state.world, c);
+          return `<div class="problem">${ALERT_ICON}<span>${esc(c.because)}${sqlBlock(sqlForContradiction(c, result), esc)}</span></div>
+            <div class="fix-box"><div class="pane-title">Ways to fix this</div>${fixList(state.fixes[ci], { attr: `data-apply-fix="${ci}" data-fix-index` })}</div>`;
+        })
+        .join("") +
+      `<p class="reasoner-note">${REASONER_NOTE}</p>`
     : `<div class="empty-state"><b>No issues</b>Mark two classes as disjoint, then put one individual in both.</div>`;
   $("#turtle").textContent = toTurtle(state.world);
 
@@ -275,6 +285,14 @@ export function initSandbox() {
   });
 
   document.addEventListener("click", (e) => {
+    const fix = e.target.closest("[data-apply-fix]");
+    if (fix) {
+      const c = result.contradictions[+fix.dataset.applyFix];
+      const f = state.fixes[+fix.dataset.applyFix][+fix.dataset.fixIndex];
+      state.world = clone(f.world);
+      toast("Contradiction fixed", fixOutcome(c, f.world));
+      return update();
+    }
     const go = e.target.closest("[data-preset-go]");
     if (go) return $(`[data-preset="${go.dataset.presetGo}"]`).click();
     const t = e.target.closest("[data-del-fact],[data-del-prop],[data-explain]");

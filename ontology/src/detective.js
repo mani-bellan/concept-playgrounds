@@ -1,6 +1,6 @@
 // "Ontology Detective": short puzzles where the player predicts what the
 // reasoner will conclude, then steps through its reasoning on the graph.
-import { reason, explain, describe, key } from "./ontology.js";
+import { reason, explain, describe, key, fixes, fixOutcome } from "./ontology.js";
 import { createGraph, graphModel } from "./graph.js";
 import { levels } from "./data.js";
 import { progress, save, award, solvedCount, onChange, formatTime, corePack, dataPack, packSolved, packPoints } from "./progress.js";
@@ -38,7 +38,21 @@ function steps() {
   return [...explain(lv.result, c.from), { contradiction: c }];
 }
 
+// Shared with the sandbox: the list of fixes under a contradiction.
+export const REASONER_NOTE = `Logic can't tell you which fix is right; that's a call for whoever owns the data. Real OWL reasoners, such as HermiT in Protégé, also go further than this app: they treat a contradictory ontology as broken as a whole and stop drawing conclusions until it's fixed.`;
+export function fixList(list, { active, attr }) {
+  return `<ul class="fixes">${list
+    .map((f, i) => `<li><button class="fix ${active === i ? "active" : ""}" ${attr}="${i}"><span class="layer layer-${f.layer}">${f.layer === "data" ? "Fix the data" : "Change the rules"}</span><span class="fix-label">Remove: ${esc(f.label)}</span></button></li>`)
+    .join("")}</ul>`;
+}
+
 function renderGraph() {
+  if (lv.fix != null) {
+    const w = lv.fixes[lv.fix].world;
+    const model = graphModel(w, lv.positions, reason(w));
+    model.bad = new Set();
+    return graph.render(model);
+  }
   const shown = lv.steps.slice(0, lv.revealed);
   const keys = new Set(shown.filter((s) => s.inferred).map(key));
   const current = shown.at(-1);
@@ -86,6 +100,7 @@ function renderFeedback() {
         )
         .join("")}</ol>` : `<p class="muted small">Step through the derivation and watch each inferred edge appear on the graph.</p>`}
     </div>
+    ${done && lv.level.contradiction ? renderFixes() : ""}
     ${done ? `<div class="takeaway"><span class="mono label">Takeaway</span>${esc(lv.level.takeaway)}</div>` : ""}
     <div class="actions">
       ${done ? "" : `<button id="next-step" class="btn ${lv.revealed ? "" : "btn-primary"} btn-sm">${lv.revealed ? `Next step <span class="muted mono">${lv.revealed}/${lv.steps.length}</span>` : "Trace the reasoning"}</button>`}
@@ -99,7 +114,28 @@ function renderFeedback() {
     renderFeedback();
   });
   $("#next-level")?.addEventListener("click", () => open(lv.index + 1));
+  fb.querySelectorAll("[data-fix]").forEach((b) => b.addEventListener("click", () => setFix(+b.dataset.fix === lv.fix ? null : +b.dataset.fix)));
+  $("#fix-undo")?.addEventListener("click", () => setFix(null));
   $("#share-result")?.addEventListener("click", () => openProfile());
+}
+
+function renderFixes() {
+  const c = lv.result.contradictions[0];
+  lv.fixes ??= fixes(lv.level.world, c);
+  const picked = lv.fix != null && lv.fixes[lv.fix];
+  return `<div class="fix-box">
+    <div class="pane-title">Ways to fix this</div>
+    <p class="muted small">Each option removes one thing behind the contradiction. Pick one to try it on the graph.</p>
+    ${fixList(lv.fixes, { active: lv.fix, attr: "data-fix" })}
+    ${picked ? `<div class="banner good fix-result">${CHECK}<span><b>Consistent again.</b> ${esc(fixOutcome(c, picked.world))}</span><button id="fix-undo" class="btn btn-ghost btn-sm">Put it back</button></div>` : ""}
+    <p class="reasoner-note">${REASONER_NOTE}</p>
+  </div>`;
+}
+
+function setFix(i) {
+  lv.fix = i;
+  renderGraph();
+  renderFeedback();
 }
 
 function renderStrip() {
@@ -138,6 +174,7 @@ function open(index) {
     result: reason(level.world),
     answered: null,
     revealed: 0,
+    fix: null,
   };
   lv.attempt = attempts[index] ??= { wrong: new Set(), hinted: false };
   lv.steps = steps();
