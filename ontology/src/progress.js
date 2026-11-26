@@ -20,11 +20,11 @@ export const BADGES = [
   { id: "explorer", name: "Under the Hood", desc: "Open the Export tab to see your world as OWL.", icon: icon('<path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>') },
   { id: "hunter", name: "Contradiction Hunter", desc: "Make the reasoner find a contradiction.", icon: icon('<path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17v.5"/>') },
   { id: "architect", name: "Architect", desc: "Complete all six guided missions.", icon: icon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/>') },
-  { id: "detective", name: "Chief Detective", desc: "Solve all six core Detective cases.", icon: icon('<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>') },
+  { id: "detective", name: "Chief Detective", desc: "Solve all seven core Detective cases.", icon: icon('<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>') },
   { id: "data", name: "Data Detective", desc: "Solve all five cases in the Data pack.", icon: icon('<ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/>') },
   { id: "flawless", name: "Flawless", desc: "Solve every core case first try, without hints.", icon: icon('<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 18 3-18"/>') },
   { id: "graduate", name: "Graduate", desc: "Complete all six course chapters.", icon: icon('<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/>') },
-  { id: "speed", name: "Speedrunner", desc: "Solve all six core cases within 4 minutes.", icon: icon('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>') },
+  { id: "speed", name: "Speedrunner", desc: "Solve all seven core cases within 5 minutes.", icon: icon('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>') },
 ];
 
 function load() {

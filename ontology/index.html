@@ -113,11 +113,41 @@
         </article>
       </div>
 
-      <div class="section-head decoder-head">
+      <div class="section-head kg-head">
+        <span class="mono label">Ontology vs knowledge graph</span>
+        <h2>The rulebook, the game, and the referee.</h2>
+      </div>
+      <div class="kg">
+        <article>
+          <span class="tag tag-class">Ontology</span>
+          <h3>The rulebook</h3>
+          <p>The kinds of things, how they can relate, and the rules they follow.</p>
+          <code>Every Order is placed by a Customer</code>
+          <div class="analogy mono">≈ schema + business rules</div>
+        </article>
+        <article>
+          <span class="tag tag-ind">Knowledge graph</span>
+          <h3>The game</h3>
+          <p>The real things and the real links between them, organised by the rulebook.</p>
+          <code>ord_981 placedBy acct_7</code>
+          <div class="analogy mono">≈ the populated database</div>
+        </article>
+        <article>
+          <span class="tag tag-inf">Reasoner</span>
+          <h3>The referee</h3>
+          <p>Applies the rules to the graph to add facts nobody stored, and flags facts that break the rules.</p>
+          <code>So acct_7 is a Customer</code>
+          <div class="analogy mono">≈ what a query alone can't do</div>
+        </article>
+      </div>
+      <p class="kg-note">People use the terms loosely: some call the ontology plus its data "the knowledge graph", and many graph databases run with little formal ontology. In Build a World, your classes and rules are the ontology; your individuals and facts are a small knowledge graph.</p>
+
+      <div class="section-head decoder-head" id="jargon">
         <span class="mono label">Jargon decoder</span>
         <h2>The words you'll see, in plain English.</h2>
       </div>
       <dl class="decoder">
+        <div><dt>Ontology</dt><dd>A description of the kinds of things in a subject, how they relate, and the rules they follow, written so a computer can use it.</dd></div>
         <div><dt>Reasoner</dt><dd>The program that reads your rules and works out new facts.</dd></div>
         <div><dt>Subclass</dt><dd>A narrower kind. Every Dog is an Animal, so Dog is a subclass of Animal.</dd></div>
         <div><dt>Domain</dt><dd>The type given to whatever starts a relationship. If the domain of "owns" is Person, anyone who owns something is a Person.</dd></div>
@@ -126,6 +156,13 @@
         <div><dt>Inverse</dt><dd>The same link read backwards: "parent of" and "child of".</dd></div>
         <div><dt>Disjoint</dt><dd>Two classes with no members in common. Nothing is both a Cat and a Dog.</dd></div>
         <div><dt>OWL &amp; Turtle</dt><dd>OWL is the W3C standard for ontologies. Turtle is a readable text format for writing it.</dd></div>
+        <div><dt>Inference</dt><dd>A fact the reasoner works out from your rules, rather than one you typed in. Shown as dashed amber arrows.</dd></div>
+        <div><dt>Contradiction</dt><dd>Facts that can't all be true under your rules, such as something being in two disjoint classes. Usually a sign of bad data.</dd></div>
+        <div><dt>Open world</dt><dd>Anything not stated or inferred is unknown, not false. Databases usually assume the opposite: no row means no.</dd></div>
+        <div><dt>Knowledge graph</dt><dd>Real things and the links between them, stored as a graph and usually organised by an ontology.</dd></div>
+        <div><dt>RDF &amp; SPARQL</dt><dd>RDF is the W3C data model behind OWL and most knowledge graphs: every fact is a subject, a predicate, and an object. SPARQL queries it, much as SQL queries tables.</dd></div>
+        <div><dt>R2RML</dt><dd>A W3C standard for mapping database tables to an ontology, so the data can be queried as a knowledge graph.</dd></div>
+        <div><dt>Semantic layer</dt><dd>Shared business definitions, such as what "revenue" means, sitting between the warehouse and BI or AI tools.</dd></div>
       </dl>
 
       <div class="where">
@@ -134,6 +171,19 @@
           <span>Schema.org</span><span>Wikidata</span><span>SNOMED CT</span><span>HL7 FHIR</span><span>Enterprise knowledge graphs</span><span>RAG pipelines</span>
         </div>
       </div>
+
+      <div class="section-head next-head" id="next">
+        <span class="mono label">Where to go next</span>
+        <h2>This is a primer. Here's where the real tools are.</h2>
+      </div>
+      <ul class="next">
+        <li><a href="https://protege.stanford.edu/" target="_blank" rel="noopener"><b>Build a real ontology</b><span>Protégé, the free ontology editor from Stanford. It opens the OWL file from the Export tab.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+        <li><a href="https://www.w3.org/TR/owl2-primer/" target="_blank" rel="noopener"><b>Learn OWL properly</b><span>The W3C OWL 2 Primer covers everything this app simplifies.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+        <li><a href="https://schema.org/" target="_blank" rel="noopener"><b>See one at web scale</b><span>Schema.org, the vocabulary millions of websites use to describe recipes, events, and products.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+        <li><a href="https://query.wikidata.org/" target="_blank" rel="noopener"><b>Query a real knowledge graph</b><span>The Wikidata Query Service runs SPARQL over a public graph of over 100 million items.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+        <li><a href="https://ontop-vkg.org/" target="_blank" rel="noopener"><b>Query your warehouse as a graph</b><span>Ontop reads the OWL and R2RML files from the Export tab and answers SPARQL over your tables.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+        <li><a href="https://docs.getdbt.com/docs/build/about-metricflow" target="_blank" rel="noopener"><b>Define metrics for BI and AI</b><span>dbt MetricFlow, where the dbt starter from the Export tab goes next.</span><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a></li>
+      </ul>
     </section>
 
     <!-- Course -->

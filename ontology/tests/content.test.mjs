@@ -14,6 +14,8 @@ test("every Detective answer is what the reasoner concludes", () => {
     } else {
       assert.equal(r.contradictions.length, 0, `case ${i + 1} should be consistent`);
       for (const k of level.targets) assert.ok(r.facts.get(k)?.inferred, `case ${i + 1}: reasoner should infer ${k}`);
+      // Open-world cases: the asked-about fact is neither stated nor inferred.
+      if (level.unknown) assert.ok(!r.facts.has(`${level.unknown.s}|${level.unknown.p}|${level.unknown.o}`), `case ${i + 1}: should stay unknown`);
     }
     assert.ok(level.answer < level.options.length, `case ${i + 1} answer index`);
   }
@@ -51,7 +53,7 @@ test("course chapters reference real missions, cases, and sources", () => {
 
 test("the generated SQL returns what the reasoner concludes", async () => {
   const { DatabaseSync } = await import("node:sqlite");
-  const { sqlFor, sqlForContradiction, table } = await import("../src/sql.js");
+  const { sqlFor, sqlForContradiction, sqlForUnknown, table } = await import("../src/sql.js");
   const { explain } = await import("../src/ontology.js");
   const { presets } = await import("../src/data.js");
   const worlds = [...levels.map((l, i) => [`case ${i + 1}`, l.world]), ...Object.entries(presets).map(([k, p]) => [k, p.world])];
@@ -88,6 +90,10 @@ test("the generated SQL returns what the reasoner concludes", async () => {
       assert.equal(run(world, result, sql).includes(c.individual), !sql.includes("Catch:"), `${name}: contradiction SQL\n${sql}`);
       checked++;
     }
+  }
+  for (const level of levels.filter((l) => l.unknown)) {
+    assert.deepEqual(run(level.world, reason(level.world), sqlForUnknown(level.unknown)), [0], "a database reads the missing row as no");
+    checked++;
   }
   assert.ok(checked > 40, `checked ${checked} queries`);
 });

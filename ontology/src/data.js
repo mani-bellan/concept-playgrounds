@@ -358,9 +358,40 @@ export const levels = [
     takeaway:
       "One name with two meanings is a classic reason dashboards don't match. Disjointness turns that into a reported error; the fix is two clearly named metrics.",
   },
+
+  // A core case, kept last in the array so saved progress (keyed by index) stays valid;
+  // the Detective strip shows it after case 6.
+  {
+    title: "Is Rex a Cat?",
+    concept: "Open world",
+    primer: "Ontologies assume an open world: a fact that isn't stated or inferred is unknown, not false. Databases usually assume the opposite, where a missing row means no.",
+    hint: "Look for any fact or rule that says Rex is not a Cat.",
+    story:
+      "A pet registry says Rex is a Dog. Dogs and Cats are both Animals. A vet's form asks: is Rex a Cat? Nobody has said Dogs and Cats can't overlap.",
+    world: {
+      classes: ["Animal", "Dog", "Cat"],
+      individuals: ["Rex"],
+      properties: [],
+      facts: [
+        { s: "Dog", p: "subClassOf", o: "Animal" },
+        { s: "Cat", p: "subClassOf", o: "Animal" },
+        { s: "Rex", p: "type", o: "Dog" },
+      ],
+    },
+    positions: { Animal: [400, 80], Dog: [230, 250], Cat: [570, 250], Rex: [230, 420] },
+    question: "What can the reasoner say about Rex being a Cat?",
+    options: ["Rex is not a Cat", "Rex is a Cat", "It can't tell: nothing says either way"],
+    answer: 2,
+    unknown: { s: "Rex", p: "type", o: "Cat" },
+    targets: ["Rex|type|Animal"],
+    takeaway:
+      "Missing means unknown, not false. To rule something out, say so: add \"Nothing can be both a Dog and a Cat\", and putting Rex in Cat becomes a contradiction the reasoner reports.",
+  },
 ];
 
 export const corePack = levels.map((l, i) => i).filter((i) => !levels[i].pack);
+// Display order: core cases first, then the Data pack.
+export const caseOrder = [...corePack, ...levels.map((l, i) => i).filter((i) => levels[i].pack)];
 export const dataPack = levels.map((l, i) => i).filter((i) => levels[i].pack === "data");
 
 // Guided missions for Build a World. They use names that no template uses,

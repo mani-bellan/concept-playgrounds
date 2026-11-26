@@ -2,9 +2,9 @@
 // reasoner will conclude, then steps through its reasoning on the graph.
 import { reason, explain, describe, key, fixes, fixOutcome } from "./ontology.js";
 import { createGraph, graphModel } from "./graph.js";
-import { levels } from "./data.js";
+import { levels, caseOrder } from "./data.js";
 import { progress, save, award, solvedCount, onChange, formatTime, corePack, dataPack, packSolved, packPoints } from "./progress.js";
-import { sqlFor, sqlForContradiction, sqlToggle, sqlNote, sqlBlock, setSqlOn } from "./sql.js";
+import { sqlFor, sqlForContradiction, sqlForUnknown, sqlToggle, sqlNote, sqlBlock, setSqlOn } from "./sql.js";
 import { openProfile } from "./profile.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -12,7 +12,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const CHECK = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const BULB = `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 12.5h4M6.5 14.5h3M8 1.5a4.5 4.5 0 0 0-2.5 8.2V11h5V9.7A4.5 4.5 0 0 0 8 1.5z"/></svg>`;
 const KEYS = "ABCD";
-const caseNo = (i) => `Case ${String(i + 1).padStart(2, "0")}`;
+const caseNo = (i) => `Case ${String(caseOrder.indexOf(i) + 1).padStart(2, "0")}`;
 const packOf = (i) => (levels[i].pack === "data" ? dataPack : corePack);
 
 let lv; // current level state
@@ -33,6 +33,8 @@ function propertyRules(p) {
 }
 
 function steps() {
+  const u = lv.level.unknown;
+  if (u) return [...explain(lv.result, lv.level.targets), { unknown: u, because: `No fact or rule says ${u.s} is a ${u.o}, and none says ${u.s} isn't. In an open world, that means unknown, not false.` }];
   if (!lv.level.contradiction) return explain(lv.result, lv.level.targets);
   const c = lv.result.contradictions[0];
   return [...explain(lv.result, c.from), { contradiction: c }];
@@ -58,7 +60,7 @@ function renderGraph() {
   const current = shown.at(-1);
   const model = graphModel(lv.level.world, lv.positions, lv.result);
   model.edges = model.edges.filter((e) => !e.inferred || keys.has(e.key));
-  model.highlight = current && !current.contradiction ? new Set([key(current)]) : null;
+  model.highlight = current && !current.contradiction && !current.unknown ? new Set([key(current)]) : null;
   model.edges.forEach((e) => (e.fresh = model.highlight?.has(e.key) && e.inferred));
   model.bad = current?.contradiction ? new Set([current.contradiction.individual]) : new Set();
   graph.render(model);
@@ -83,7 +85,8 @@ function renderFeedback() {
   }
   const shown = lv.steps.slice(0, lv.revealed);
   const done = lv.revealed >= lv.steps.length;
-  const last = lv.index === levels.length - 1;
+  const next = caseOrder[caseOrder.indexOf(lv.index) + 1];
+  const last = next === undefined;
   const pack = packOf(lv.index);
   const isData = pack === dataPack;
   const toData = lv.index === corePack.at(-1) && !packSolved(dataPack);
@@ -94,7 +97,9 @@ function renderFeedback() {
       <div class="pane-title">Reasoner trace ${sqlToggle()}</div>
       ${shown.length ? `${sqlNote()}<ol class="why">${shown
         .map((s) =>
-          s.contradiction
+          s.unknown
+            ? `<li class="unknown">${esc(s.because)}${sqlBlock(sqlForUnknown(s.unknown), esc)}</li>`
+            : s.contradiction
             ? `<li class="contra">${esc(s.contradiction.because)}${sqlBlock(sqlForContradiction(s.contradiction, lv.result), esc)}</li>`
             : `<li class="${s.inferred ? "inf" : ""}">${s.inferred ? `<span class="rule">${s.rule}</span>${esc(s.because)}${sqlBlock(sqlFor(s, lv.result), esc)}` : `${esc(describe(s))} <span class="muted">· given</span>`}</li>`,
         )
@@ -113,7 +118,7 @@ function renderFeedback() {
     renderGraph();
     renderFeedback();
   });
-  $("#next-level")?.addEventListener("click", () => open(lv.index + 1));
+  $("#next-level")?.addEventListener("click", () => open(next));
   fb.querySelectorAll("[data-fix]").forEach((b) => b.addEventListener("click", () => setFix(+b.dataset.fix === lv.fix ? null : +b.dataset.fix)));
   $("#fix-undo")?.addEventListener("click", () => setFix(null));
   $("#share-result")?.addEventListener("click", () => openProfile());
@@ -139,8 +144,9 @@ function setFix(i) {
 }
 
 function renderStrip() {
-  $("#level-strip").innerHTML = levels
-    .map((l, i) => {
+  $("#level-strip").innerHTML = caseOrder
+    .map((i) => {
+      const l = levels[i];
       const pts = progress.cases[i];
       const solved = i in progress.cases;
       return `<button class="lvl ${l.pack ? "lvl-data" : ""} ${i === lv.index ? "active" : ""}" data-level="${i}">
@@ -209,7 +215,7 @@ function answer(i) {
     if (core && packSolved(corePack)) {
       award("detective");
       if (packPoints(corePack) === corePack.length * 3) award("flawless");
-      if (progress.finishedAt - progress.startedAt <= 4 * 60 * 1000) award("speed");
+      if (progress.finishedAt - progress.startedAt <= 5 * 60 * 1000) award("speed");
     }
     if (!core && packSolved(dataPack)) award("data");
   }
@@ -246,8 +252,7 @@ export function initDetective() {
     else renderStrip();
   });
 
-  const firstUnsolved = levels.findIndex((_, i) => !(i in progress.cases));
-  open(firstUnsolved === -1 ? 0 : firstUnsolved);
+  open(caseOrder.find((i) => !(i in progress.cases)) ?? 0);
 }
 
 export { open as openCase };

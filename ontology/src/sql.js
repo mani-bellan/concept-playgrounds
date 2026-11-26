@@ -83,6 +83,13 @@ SELECT entity FROM is_a WHERE class = ${q(y)};  -- should return no rows${
   }`;
 }
 
+// The open-world contrast: a database reads a missing row as "no".
+export function sqlForUnknown(f) {
+  return `-- A database answers from what's stored: no row, so the answer is "no"
+SELECT EXISTS (SELECT 1 FROM is_a WHERE entity = ${q(f.s)} AND class = ${q(f.o)});  -- 0
+-- The ontology reads the same missing row as "unknown".`;
+}
+
 // Toggle markup and the block shown under one trace step.
 export const sqlToggle = () =>
   `<label class="sql-toggle"><input type="checkbox" data-sql-toggle ${sqlOn() ? "checked" : ""}><span class="switch"></span>Show the SQL</label>`;

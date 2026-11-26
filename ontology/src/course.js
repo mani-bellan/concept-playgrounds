@@ -59,7 +59,8 @@ function renderHome() {
         </button></li>`;
       })
       .join("")}</ol>
-    <p class="course-note">This playground teaches a simplified subset of OWL: classes, subclasses, domain, range, transitive and inverse properties, and disjointness. Real reasoners support much more. Every chapter links its sources; <a href="${ISSUE_URL}" target="_blank" rel="noopener">report anything that looks wrong</a>.</p>`;
+    <p class="course-note">This playground teaches a simplified subset of OWL: classes, subclasses, domain, range, transitive and inverse properties, and disjointness. Real reasoners support much more. Every chapter links its sources; <a href="${ISSUE_URL}" target="_blank" rel="noopener">report anything that looks wrong</a>.</p>
+    <p class="course-note">Stuck on a word? See the <a href="#learn" data-goto="learn" data-anchor="jargon">jargon decoder</a>. Finished? Here's <a href="#learn" data-goto="learn" data-anchor="next">where to go next</a>.</p>`;
 }
 
 // Display order of quiz options, varied per question so the answer isn't always first.

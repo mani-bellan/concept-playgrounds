@@ -20,7 +20,10 @@ export function setBack(label, go) {
 export function initNav() {
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-tab], [data-goto]");
-    if (t) show(t.dataset.tab ?? t.dataset.goto);
+    if (!t) return;
+    if (t.tagName === "A") e.preventDefault();
+    show(t.dataset.tab ?? t.dataset.goto);
+    if (t.dataset.anchor) document.getElementById(t.dataset.anchor)?.scrollIntoView();
   });
   $("#back-bar").addEventListener("click", () => back?.go());
 }

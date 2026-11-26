@@ -658,3 +658,27 @@ pre.sql .catch { color: var(--inf); }
 /* Export tab */
 .export-head { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
 .export-head .formats { flex: 1; }
+.why li.unknown { color: var(--ink); font-weight: 500; }
+.why li.unknown::before { content: "?"; border-color: var(--line-2); color: var(--ink-2); }
+
+/* Ontology vs knowledge graph */
+.kg-head { margin-top: 64px; }
+.kg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; max-width: 1240px; margin: 0 auto; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.kg article { background: var(--panel); padding: 22px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.kg h3 { margin: 6px 0 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.kg p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); flex: 1; }
+.kg code { font-size: 12px; }
+.kg .analogy { align-self: stretch; }
+.kg-note { max-width: 1240px; margin: 12px auto 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+
+/* Where to go next */
+.next-head { margin-top: 64px; }
+.next { list-style: none; padding: 0; max-width: 1240px; margin: 0 auto 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.next a { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; row-gap: 4px; align-items: center; height: 100%; box-sizing: border-box; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; text-decoration: none; transition: border-color .15s, background .15s; }
+.next a:hover { border-color: var(--line-2); background: var(--panel-2); }
+.next b { font-size: 14px; font-weight: 600; }
+.next span { grid-column: 1; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.next svg { grid-column: 2; grid-row: 1 / span 2; color: var(--faint); }
+@media (max-width: 1200px) { .next { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 760px) { .kg, .next { grid-template-columns: 1fr; } }
+#jargon, #next { scroll-margin-top: 84px; }

@@ -98,10 +98,12 @@ export const chapters = [
       everyday: [
         "Some categories can never overlap: nothing is both a cat and a dog, or both a person and a company. Saying so lets the computer catch mistakes.",
         "If the facts ever force something into both, the computer reports a contradiction. That almost always means a data-entry error worth fixing.",
+        "One catch: the computer only knows the rules you give it. Unless you say two categories can't overlap, something may belong to both. Missing information means \u201cnot known\u201d, not \u201cno\u201d.",
       ],
       tech: [
         "Disjointness axioms turn silent data-quality bugs into explicit errors.",
         "If a record ends up typed as both Individual and Organisation, perhaps through a domain rule on hasPassport, the ontology becomes inconsistent and the reasoner can point to the facts that caused it. It works like an integrity check that also covers facts that were only inferred.",
+        "OWL makes the open-world assumption: a fact that isn't stated or inferred is unknown, not false. So classes may overlap unless declared disjoint. Databases usually make the closed-world assumption, where a missing row means false.",
       ],
     },
     example: {
