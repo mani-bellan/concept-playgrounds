@@ -175,11 +175,17 @@ export function fixOutcome(c, fixedWorld) {
   return `${c.individual} is now neither ${an(x)} nor ${an(y)}.`;
 }
 
-const iri = (name) => "ex:" + name.replace(/[^A-Za-z0-9_]/g, "_");
+export const BASE = "http://example.org/";
+
+// R2RML's IRI-safe encoding (keep unreserved and non-ASCII characters,
+// percent-encode the rest as UTF-8), so OWL and R2RML give a name the same IRI.
+export const encode = (s) =>
+  [...s].map((c) => (/[A-Za-z0-9\-._~\u00A0-\uFFFF]/.test(c) ? c : [...new TextEncoder().encode(c)].map((b) => "%" + b.toString(16).toUpperCase().padStart(2, "0")).join(""))).join("");
+export const iri = (name) => (/^[A-Za-z_][A-Za-z0-9_-]*$/.test(name) ? `ex:${name}` : `<${BASE}${encode(name)}>`);
 
 export function toTurtle(world) {
   const out = [
-    "@prefix ex:   <http://example.org/> .",
+    `@prefix ex:   <${BASE}> .`,
     "@prefix owl:  <http://www.w3.org/2002/07/owl#> .",
     "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
     "",

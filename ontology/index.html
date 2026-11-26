@@ -215,13 +215,22 @@
           <button class="subtab active" data-sub="missions">Missions</button>
           <button class="subtab" data-sub="inferred">Inferred</button>
           <button class="subtab" data-sub="problems">Issues <span id="problem-count"></span></button>
-          <button class="subtab" data-sub="turtle">OWL</button>
+          <button class="subtab" data-sub="turtle">Export</button>
         </div>
         <div class="sub active" id="sub-missions"></div>
         <div class="sub" id="sub-inferred"></div>
         <div class="sub" id="sub-problems"></div>
         <div class="sub" id="sub-turtle">
-          <p class="muted small">Your world in OWL, the W3C ontology standard, serialized as Turtle.</p>
+          <div class="export-head">
+            <div class="segmented formats">
+              <button data-format="owl" class="active">OWL</button>
+              <button data-format="r2rml">R2RML</button>
+              <button data-format="dbt">dbt</button>
+            </div>
+            <button class="btn btn-sm" id="export-copy">Copy</button>
+            <button class="btn btn-sm" id="export-download">Download</button>
+          </div>
+          <p class="muted small" id="export-desc"></p>
           <pre id="turtle"></pre>
         </div>
       </aside>

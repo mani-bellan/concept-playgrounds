@@ -1,6 +1,7 @@
 // "Build a World": a free-form ontology editor with a live reasoner.
 import { reason, explain, describe, relationLabel, toTurtle, fixes, fixOutcome } from "./ontology.js";
 import { fixList, REASONER_NOTE } from "./detective.js";
+import { toR2RML, toMetricFlow } from "./export.js";
 import { createGraph, graphModel } from "./graph.js";
 import { presets, missions } from "./data.js";
 import { sqlFor, sqlForContradiction, sqlToggle, sqlNote, sqlBlock } from "./sql.js";
@@ -17,6 +18,13 @@ const PLAY_ICON = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 2
 let state;
 let result;
 let fresh = false;
+let format = "owl";
+
+const EXPORTS = {
+  owl: { file: "ontology.ttl", render: toTurtle, desc: "Your world in OWL, the W3C ontology standard, written as Turtle. Open it in Protégé to explore further." },
+  r2rml: { file: "mapping.r2rml.ttl", render: toR2RML, desc: "R2RML, a W3C standard, maps warehouse tables to your ontology. Give it and the OWL file to a tool such as Ontop, and you can query the warehouse as a knowledge graph. It uses the same tables as Show the SQL." },
+  dbt: { file: "semantic_models.yml", render: toMetricFlow, desc: "A dbt MetricFlow starter: a semantic model for each class and relationship, each with a count metric. Add your real measures, such as revenue, yourself." },
+};
 
 function load(preset) {
   const p = presets[preset];
@@ -140,7 +148,8 @@ function renderInsights() {
         .join("") +
       `<p class="reasoner-note">${REASONER_NOTE}</p>`
     : `<div class="empty-state"><b>No issues</b>Mark two classes as disjoint, then put one individual in both.</div>`;
-  $("#turtle").textContent = toTurtle(state.world);
+  $("#turtle").textContent = EXPORTS[format].render(state.world);
+  $("#export-desc").textContent = EXPORTS[format].desc;
 
   const msg = $("#reason-msg");
   $("#reason-btn").innerHTML = state.showInferred ? "Hide inferences" : `${PLAY_ICON}Run reasoner`;
@@ -313,6 +322,25 @@ export function initSandbox() {
     state.highlight = null;
     fresh = state.showInferred;
     update();
+  });
+
+  document.querySelectorAll("[data-format]").forEach((b) =>
+    b.addEventListener("click", () => {
+      document.querySelectorAll("[data-format]").forEach((x) => x.classList.toggle("active", x === b));
+      format = b.dataset.format;
+      renderInsights();
+    }),
+  );
+  $("#export-copy").addEventListener("click", async () => {
+    await navigator.clipboard.writeText($("#turtle").textContent);
+    toast("Copied", `${EXPORTS[format].file} is on your clipboard.`);
+  });
+  $("#export-download").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([$("#turtle").textContent], { type: "text/plain" }));
+    a.download = EXPORTS[format].file;
+    a.click();
+    URL.revokeObjectURL(a.href);
   });
 
   document.querySelectorAll(".subtab").forEach((b) =>

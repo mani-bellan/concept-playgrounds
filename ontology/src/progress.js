@@ -17,7 +17,7 @@ const icon = (d) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none"
 export const BADGES = [
   { id: "spark", name: "First Spark", desc: "Run the reasoner for the first time.", icon: icon('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>') },
   { id: "cracker", name: "Case Cracker", desc: "Solve your first Detective case.", icon: icon('<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>') },
-  { id: "explorer", name: "Under the Hood", desc: "Open the OWL view of your world.", icon: icon('<path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>') },
+  { id: "explorer", name: "Under the Hood", desc: "Open the Export tab to see your world as OWL.", icon: icon('<path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>') },
   { id: "hunter", name: "Contradiction Hunter", desc: "Make the reasoner find a contradiction.", icon: icon('<path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17v.5"/>') },
   { id: "architect", name: "Architect", desc: "Complete all six guided missions.", icon: icon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/>') },
   { id: "detective", name: "Chief Detective", desc: "Solve all six core Detective cases.", icon: icon('<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>') },

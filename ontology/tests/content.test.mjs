@@ -106,3 +106,17 @@ test("every suggested fix resolves its contradiction, and only real causes are o
   assert.equal(labels(4).length, 5);
   assert.deepEqual(labels(10).sort(), ["Nothing can be both a GrossRevenue and a NetRevenue", "revenue_q3 is a GrossRevenue", "revenue_q3 is a NetRevenue"]);
 });
+
+test("OWL and R2RML exports give every name the same IRI", async () => {
+  const { toTurtle, iri } = await import("../src/ontology.js");
+  const { toR2RML } = await import("../src/export.js");
+  // R2RML percent-encodes reserved characters in template values but keeps unreserved and non-ASCII ones.
+  assert.equal(iri("Rex"), "ex:Rex");
+  assert.equal(iri("P-42"), "ex:P-42");
+  assert.equal(iri("my dog"), "<http://example.org/my%20dog>");
+  assert.equal(iri("users.email"), "<http://example.org/users.email>");
+  assert.equal(iri("Zoë/2"), "<http://example.org/Zoë%2F2>");
+  const w = { classes: ["Pet Owner"], individuals: ["my dog"], properties: [{ id: "walksWith" }], facts: [{ s: "my dog", p: "type", o: "Pet Owner" }] };
+  assert.match(toTurtle(w), /<http:\/\/example\.org\/my%20dog> a <http:\/\/example\.org\/Pet%20Owner>/);
+  assert.match(toR2RML(w), /rr:tableName "walks_with" \] ;\n  rr:subjectMap \[ rr:template "http:\/\/example\.org\/\{source\}" \]/);
+});
