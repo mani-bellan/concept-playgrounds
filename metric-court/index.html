@@ -17,79 +17,81 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#top"><span class="dot"></span>Metric Court</a>
+    <a class="brand" href="#home"><span class="dot"></span>Metric Court</a>
+    <nav class="tabs" aria-label="Sections">
+      <a class="tab" href="#course" data-view="course">Course</a>
+      <a class="tab" href="#cases" data-view="cases">Cases</a>
+      <a class="tab" href="#build" data-view="build"><span class="long">Build a metric</span><span class="short">Build</span></a>
+    </nav>
     <div class="top-right">
+      <button class="score-btn" id="score-btn" title="Your score and badges"></button>
       <button class="icon-btn" id="theme-btn" aria-label="Switch between day and night mode" title="Day or night">
         <svg class="moon" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg>
         <svg class="sun" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>
       </button>
-      <a class="icon-btn" href="https://github.com/mani-bellan/concept-playgrounds" target="_blank" rel="noopener" aria-label="Source on GitHub">
+      <a class="icon-btn gh" href="https://github.com/mani-bellan/concept-playgrounds" target="_blank" rel="noopener" aria-label="Source on GitHub">
         <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
     </div>
   </header>
 
-  <main id="top">
-    <section class="intro">
-      <p class="kicker">A 5-minute primer on metrics</p>
-      <h1>Two dashboards. Two numbers. <span class="hi">Who is right?</span></h1>
-      <p class="lede">Every company has had this argument. Settle two disputes and you'll know why it happens, and how a shared metric definition, called a semantic layer, stops it.</p>
-      <ol class="steps">
-        <li><a href="#warmup"><b>1</b> Warm-up: the party</a></li>
-        <li><a href="#case01"><b>2</b> Case 01: March revenue</a></li>
-      </ol>
+  <main>
+    <!-- Home: intro and the party warm-up -->
+    <section class="view" id="view-home">
+      <div class="intro">
+        <p class="kicker">An interactive primer on metrics</p>
+        <h1>Two dashboards. Two numbers. <span class="hi">Who is right?</span></h1>
+        <p class="lede">Every company has had this argument. Settle a few disputes and you'll know why it happens, and how a shared metric definition, called a semantic layer, stops it. No background needed.</p>
+        <div class="cta">
+          <a class="btn" href="#warmup">Start with the warm-up</a>
+          <a class="btn ghost" href="#cases">Jump to the cases</a>
+        </div>
+        <ol class="path">
+          <li><b>1</b><div><strong>Warm-up</strong><span>A party, three headcounts</span></div></li>
+          <li><b>2</b><div><strong>Course</strong><span>5 short chapters</span></div></li>
+          <li><b>3</b><div><strong>Cases</strong><span>8 number disputes</span></div></li>
+          <li><b>4</b><div><strong>Build a metric</strong><span>Write the recipe once</span></div></li>
+        </ol>
+      </div>
+
+      <section class="scene" id="warmup">
+        <div class="scene-head">
+          <span class="tag">Warm-up</span>
+          <h2>How many people came to Sam's party?</h2>
+        </div>
+        <div class="boards" id="party-boards"></div>
+        <div class="guess" id="party-guess"></div>
+        <div class="reveal" id="party-reveal" hidden>
+          <div class="lens-bar" id="party-lenses" role="tablist" aria-label="Whose count to show"></div>
+          <p class="lens-note" id="party-note"></p>
+          <div class="guests" id="party-guests"></div>
+          <div class="legend" id="party-legend"></div>
+          <div class="recipe-card">
+            <h3>A metric is a recipe</h3>
+            <p>Same party, different recipes. Every metric answers four questions, and most number fights come from answering one of them differently.</p>
+            <ul class="four" id="four"></ul>
+            <div class="cta">
+              <a class="btn" href="#course">Start the course</a>
+              <a class="btn ghost" href="#cases/01">Try Case 01</a>
+            </div>
+          </div>
+        </div>
+      </section>
     </section>
 
-    <section class="scene" id="warmup">
-      <div class="scene-head">
-        <span class="tag">Warm-up</span>
-        <h2>How many people came to Sam's party?</h2>
-      </div>
-      <div class="boards" id="party-boards"></div>
-      <div class="guess" id="party-guess"></div>
-      <div class="reveal" id="party-reveal" hidden>
-        <div class="lens-bar" id="party-lenses" role="tablist" aria-label="Whose count to show"></div>
-        <p class="lens-note" id="party-note"></p>
-        <div class="guests" id="party-guests"></div>
-        <div class="legend" id="party-legend"></div>
-        <div class="recipe-card">
-          <h3>A metric is a recipe</h3>
-          <p>Same party, different recipes. Every metric answers four questions, and most number fights come from answering one of them differently.</p>
-          <ul class="four" id="four"></ul>
-          <a class="btn" href="#case01">On to Case 01</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="scene" id="case01">
-      <div class="scene-head">
-        <span class="tag">Case 01 · March revenue</span>
-        <h2 id="case-q"></h2>
-      </div>
-      <div class="guess" id="case-guess"></div>
-      <div class="boards" id="case-boards"></div>
-      <div class="court">
-        <div class="switches" id="switches">
-          <p class="small-label">Your recipe</p>
-        </div>
-        <div class="orders" id="orders"></div>
-      </div>
-      <div class="gap">
-        <div class="gap-head"><span id="gap-title"></span><span class="num" id="gap-range"></span></div>
-        <div class="bridge" id="bridge"></div>
-        <div class="legend" id="bridge-legend"></div>
-      </div>
-      <div class="verdict" id="verdict" aria-live="polite"></div>
-      <details class="sql">
-        <summary>Show the SQL</summary>
-        <pre id="sql"></pre>
-      </details>
-    </section>
+    <section class="view" id="view-course"></section>
+    <section class="view" id="view-cases"></section>
+    <section class="view" id="view-build"></section>
 
     <footer class="foot">
-      <p>Prototype. Example data. Part of <a href="https://github.com/mani-bellan/concept-playgrounds">Concept Playgrounds</a>.</p>
+      <p>Example data throughout. Progress stays in your browser; nothing is tracked. Part of <a href="https://github.com/mani-bellan/concept-playgrounds">Concept Playgrounds</a>. Spotted a mistake? <a href="https://github.com/mani-bellan/concept-playgrounds/issues/new?title=Metric%20Court%3A%20">Report it</a>.</p>
     </footer>
   </main>
+
+  <dialog id="profile" aria-label="Your score and badges">
+    <div class="dlg-head"><h2>Your progress</h2><button class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <div id="profile-body"></div>
+  </dialog>
 
   <script type="module" src="src/app.js"></script>
 </body>
